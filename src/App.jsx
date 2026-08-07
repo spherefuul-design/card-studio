@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Upload, Image as ImageIcon, Sparkles, Download, RotateCcw, Check,
   Aperture, Loader2, AlertCircle, Eye, EyeOff, Zap, ExternalLink,
-  Settings, X, Sun, Moon, Languages, Gauge, Trash2,
+  Settings, X, Sun, Moon, Languages, Gauge, Trash2, BookOpen,
 } from "lucide-react";
 
 // ---------- Design tokens ----------
@@ -711,6 +711,7 @@ export default function CardStudio() {
 
   const busy = phase === "uploading-ai" || phase === "compositing";
   const downloadExt = exportFormat === "jpeg" ? "jpg" : "png";
+  const isDark = theme === "dark";
 
   return (
     <div
@@ -719,36 +720,97 @@ export default function CardStudio() {
     >
       <canvas ref={canvasRef} className="hidden" />
 
-      <header className="border-b" style={{ borderColor: c.hairline, transition: "border-color .2s ease" }}>
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: c.solid }}>
-              <Aperture size={16} color={c.flash} strokeWidth={2.2} />
-            </div>
-            <span style={{ fontFamily: "Fraunces, serif" }} className="text-lg font-medium tracking-tight">{tt.brand}</span>
-          </div>
-          <div className="flex items-center gap-2.5">
+      <header
+        className="sticky top-0 z-20 border-b backdrop-blur-md"
+        style={{
+          borderColor: c.hairline,
+          background: isDark ? "rgba(18, 19, 23, 0.72)" : "rgba(255, 255, 255, 0.72)",
+          transition: "border-color .2s ease, background-color .2s ease",
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div
-              className="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
-              style={{ background: c.panel, border: `1px solid ${c.hairline}`, color: c.inkSoft, fontFamily: "IBM Plex Mono, monospace" }}
+              className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm"
+              style={{ background: `linear-gradient(135deg, ${c.solid}, ${c.accent})` }}
             >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: apiKey ? c.success : c.hairlineStrong }} />
-              {apiKey ? tt.geminiConnected : tt.localMode}
+              <Aperture size={18} color={c.flash} strokeWidth={2.2} />
             </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span
+                  style={{ fontFamily: "Fraunces, serif" }}
+                  className="text-lg font-semibold tracking-tight whitespace-nowrap"
+                >
+                  <span
+                    style={{
+                      backgroundImage: `linear-gradient(90deg, ${c.accent}, ${c.flash} 55%, ${c.accent})`,
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      color: "transparent",
+                    }}
+                  >
+                    AI Card Maker
+                  </span>
+                </span>
+                <span
+                  className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em]"
+                  style={{ background: c.accentSoft, color: c.accent, border: `1px solid ${c.hairline}` }}
+                >
+                  v2.0
+                </span>
+              </div>
+              <div className="text-xs truncate" style={{ color: c.inkSoft }}>
+                {apiKey ? tt.geminiConnected : tt.localMode}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <div className="hidden sm:flex items-center rounded-full p-1" style={{ background: c.panelAlt, border: `1px solid ${c.hairline}` }}>
+              <button
+                type="button"
+                onClick={() => setLang("uk")}
+                className="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                style={{
+                  background: lang === "uk" ? c.accent : "transparent",
+                  color: lang === "uk" ? c.onSolid : c.inkSoft,
+                }}
+              >
+                UA
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                style={{
+                  background: lang === "en" ? c.accent : "transparent",
+                  color: lang === "en" ? c.onSolid : c.inkSoft,
+                }}
+              >
+                EN
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition"
+              style={{ background: c.panel, border: `1px solid ${c.hairline}`, color: c.ink }}
+            >
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
-              aria-label={tt.settingsBtn}
-              className="icon-btn relative w-9 h-9 rounded-full flex items-center justify-center"
+              className="hidden sm:flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition"
               style={{ background: c.panel, border: `1px solid ${c.hairline}`, color: c.ink }}
             >
-              <Settings size={16} />
-              {!apiKey && (
-                <span
-                  className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                  style={{ background: c.flash, border: `2px solid ${c.paper}` }}
-                />
-              )}
+              <BookOpen size={15} />
+              <span>Guide</span>
             </button>
           </div>
         </div>
