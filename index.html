@@ -143,6 +143,7 @@ input{font-family:inherit;}
 .fab:active{ transform:scale(.92); }
 .fab.primary{ color:var(--accent); }
 .fab.on{ background:var(--accent); color:var(--accent-ink); }
+#compassBtn{ transition:transform .25s var(--ease); }
 
 /* ============================================================
    BOTTOM ACTION PILLS (AI connect / Shadow connect)
@@ -535,6 +536,7 @@ input{font-family:inherit;}
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
 <script>
 "use strict";
 /* ================================================================================================
@@ -549,8 +551,9 @@ input{font-family:inherit;}
    CONFIG
 --------------------------------------------------------------------------- */
 const CFG = {
-  DEFAULT_CENTER: { lat: 50.4501, lon: 30.5234 }, // Kyiv, Khreshchatyk — used until real location is known
+  DEFAULT_CENTER: { lat: 50.4501, lon: 30.5234 }, // Kyiv, Khreshchatyk — used only if GPS and IP location both fail
   DEFAULT_ZOOM: 15,
+  IP_GEO: 'https://ipapi.co/json/', // fallback location by IP when browser GPS is denied/unavailable
   NOMINATIM: 'https://nominatim.openstreetmap.org',
   OSRM: 'https://router.project-osrm.org',
   OVERPASS: 'https://overpass-api.de/api/interpreter',
@@ -678,13 +681,94 @@ const SunEngine = (() => {
 --------------------------------------------------------------------------- */
 const GeoEngine = (() => {
   const CATEGORY_TAGS = {
-    cafe:       { label:'Кав\u2019ярня',  q:'["amenity"="cafe"]' },
-    restaurant: { label:'Ресторан',   q:'["amenity"="restaurant"]' },
-    shop:       { label:'Магазин',    q:'["shop"]' },
-    pharmacy:   { label:'Аптека',     q:'["amenity"="pharmacy"]' },
-    park:       { label:'Парк',       q:'["leisure"="park"]' },
-    fuel:       { label:'Заправка',   q:'["amenity"="fuel"]' },
+    cafe:        { label:'Кав\u2019ярня',        q:'["amenity"="cafe"]' },
+    restaurant:  { label:'Ресторан',          q:'["amenity"="restaurant"]' },
+    fastfood:    { label:'Фастфуд',           q:'["amenity"="fast_food"]' },
+    bar:         { label:'Бар',               q:'["amenity"~"^(bar|pub)$"]' },
+    hardware:    { label:'Будівельний магазин', q:'["shop"~"^(hardware|doityourself|trade|hardware_store|building_materials|electrical|paint)$"]' },
+    grocery:     { label:'Продуктовий магазин', q:'["shop"~"^(supermarket|convenience|grocery|greengrocer|butcher|bakery|deli|dairy)$"]' },
+    clothes:     { label:'Магазин одягу',     q:'["shop"~"^(clothes|boutique)$"]' },
+    shoes:       { label:'Магазин взуття',    q:'["shop"="shoes"]' },
+    electronics: { label:'Магазин електроніки', q:'["shop"~"^(electronics|mobile_phone|computer)$"]' },
+    mall:        { label:'Торговий центр',    q:'["shop"="mall"]' },
+    shop:        { label:'Магазин',           q:'["shop"]' },
+    pharmacy:    { label:'Аптека',            q:'["amenity"="pharmacy"]' },
+    hospital:    { label:'Лікарня',           q:'["amenity"="hospital"]' },
+    clinic:      { label:'Клініка',           q:'["amenity"~"^(clinic|doctors)$"]' },
+    dentist:     { label:'Стоматологія',      q:'["amenity"="dentist"]' },
+    veterinary:  { label:'Ветклініка',        q:'["amenity"="veterinary"]' },
+    bank:        { label:'Банк',              q:'["amenity"="bank"]' },
+    atm:         { label:'Банкомат',          q:'["amenity"="atm"]' },
+    post:        { label:'Пошта',             q:'["amenity"="post_office"]' },
+    park:        { label:'Парк',              q:'["leisure"="park"]' },
+    fuel:        { label:'Заправка',          q:'["amenity"="fuel"]' },
+    parking:     { label:'Парковка',          q:'["amenity"="parking"]' },
+    hotel:       { label:'Готель',            q:'["tourism"~"^(hotel|hostel|guest_house)$"]' },
+    cinema:      { label:'Кінотеатр',         q:'["amenity"="cinema"]' },
+    theatre:     { label:'Театр',             q:'["amenity"="theatre"]' },
+    museum:      { label:'Музей',             q:'["tourism"="museum"]' },
+    gym:         { label:'Спортзал',          q:'["leisure"~"^(fitness_centre|sports_centre)$"]' },
+    hairdresser: { label:'Перукарня',         q:'["shop"="hairdresser"]' },
+    laundry:     { label:'Хімчистка/пральня', q:'["shop"~"^(laundry|dry_cleaning)$"]' },
+    library:     { label:'Бібліотека',        q:'["amenity"="library"]' },
+    school:      { label:'Школа',             q:'["amenity"="school"]' },
+    university:  { label:'Університет',       q:'["amenity"~"^(university|college)$"]' },
+    church:      { label:'Храм',              q:'["amenity"="place_of_worship"]' },
+    station:     { label:'Вокзал/станція',    q:'["railway"="station"]' },
+    airport:     { label:'Аеропорт',          q:'["aeroway"="aerodrome"]' },
+    toilets:     { label:'Туалет',            q:'["amenity"="toilets"]' },
+    police:      { label:'Поліція',           q:'["amenity"="police"]' },
+    carwash:     { label:'Автомийка',         q:'["shop"="car_wash"]' },
   };
+
+  // ordered Ukrainian keyword → category rules, shared by AI chat and the search bar.
+  // more specific patterns are listed before generic ones (e.g. "будівельний магазин" before "магазин").
+  const CATEGORY_KEYWORD_RULES = [
+    [/кав.ярн|кафе(?!тер)|каву|кава/, 'cafe'],
+    [/ресторан|поїсти|повечеряти/, 'restaurant'],
+    [/фастфуд|шаурм|піцер\w*|бургер/, 'fastfood'],
+    [/\bбар\b|паб|пивн/, 'bar'],
+    [/будівельн|будматеріал|господарськ|хозтовар|скобян|фарб(и|у)\s*магазин/, 'hardware'],
+    [/продукт|бакалі|гастроном|супермаркет|овоч|м.ясн|булочн|хлібн|молочн/, 'grocery'],
+    [/одяг|одежин|бутик/, 'clothes'],
+    [/взутт/, 'shoes'],
+    [/електроніка|побутов(а|у)\s*технік|телефон\w*\s*магазин/, 'electronics'],
+    [/торговий\s*центр|\bтц\b|молл/, 'mall'],
+    [/магазин|крамниц/, 'shop'],
+    [/аптек/, 'pharmacy'],
+    [/лікарн|госпіталь/, 'hospital'],
+    [/клінік|поліклінік/, 'clinic'],
+    [/стоматолог|зубн(ий|у)\s*лікар/, 'dentist'],
+    [/ветеринар|ветлікар/, 'veterinary'],
+    [/\bбанк\b/, 'bank'],
+    [/банкомат/, 'atm'],
+    [/\bпошт\w*|укрпошт|нова\s*пошта/, 'post'],
+    [/парк\b|сквер/, 'park'],
+    [/заправ|азс|бензин/, 'fuel'],
+    [/парковк|стоянк/, 'parking'],
+    [/готел|хостел/, 'hotel'],
+    [/кінотеатр|кіно\b/, 'cinema'],
+    [/театр/, 'theatre'],
+    [/музе[йю]/, 'museum'],
+    [/спортзал|фітнес|тренажерн/, 'gym'],
+    [/перукарн|барбершоп/, 'hairdresser'],
+    [/пральн|хімчистк/, 'laundry'],
+    [/бібліотек/, 'library'],
+    [/\bшкол/, 'school'],
+    [/університет|коледж/, 'university'],
+    [/церкв|храм|костел|мечет|синагог/, 'church'],
+    [/вокзал|станці\w*\s*(метро|потяг|потягу)|зупинк\w*\s*автобус/, 'station'],
+    [/аеропорт/, 'airport'],
+    [/туалет|вбиральн/, 'toilets'],
+    [/поліці/, 'police'],
+    [/автомийк|мийк(а|у)\s*(машин|авто)/, 'carwash'],
+  ];
+
+  function detectCategory(text){
+    const q = text.toLowerCase();
+    for(const [re, key] of CATEGORY_KEYWORD_RULES){ if(re.test(q)) return key; }
+    return null;
+  }
 
   async function fetchJSON(url, opts){
     const res = await fetch(url, opts);
@@ -759,7 +843,18 @@ const GeoEngine = (() => {
     });
   }
 
-  return { search, reverse, nearbyCategory, buildingsInBounds, CATEGORY_TAGS };
+  // approximate location from IP address — used only when browser GPS is denied/unavailable
+  async function ipLocate(){
+    try{
+      const d = await fetchJSON(CFG.IP_GEO);
+      const lat = parseFloat(d.latitude), lon = parseFloat(d.longitude);
+      if(isNaN(lat) || isNaN(lon)) return null;
+      const label = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+      return { pos:[lat, lon], label };
+    }catch(e){ return null; }
+  }
+
+  return { search, reverse, nearbyCategory, buildingsInBounds, ipLocate, detectCategory, CATEGORY_TAGS };
 })();
 
 /* ---------------------------------------------------------------------------
@@ -1008,20 +1103,11 @@ const AIEngine = (() => {
     if(/по тін|у тіні|тіньовий/.test(q) && /(маршрут|веди|проклад|дорог)/.test(q)) return { intent:'route', mode:'shadow', target:extractTarget(q) };
     if(/найшвидш|швидкий маршрут|коротш/.test(q)) return { intent:'route', mode:'fastest', target:extractTarget(q) };
     if(/веди мене|проклад(и)? маршрут|побудуй маршрут|доведи мене/.test(q)) return { intent:'route', mode:/тін/.test(q)?'shadow':'fastest', target:extractTarget(q) };
-    const cat = detectCategoryUk(q);
+    const cat = GeoEngine.detectCategory(q);
     if(cat) return { intent:'find_place', category:cat, mode: /тін/.test(q)?'shadow':null, target:extractTarget(q) };
-    if(/знайди|шукай|пошук/.test(q)) return { intent:'find_address', target:extractTarget(q) };
-    return { intent:'unknown', raw:text };
-  }
-
-  function detectCategoryUk(q){
-    if(/кав.ярн|кафе|каву|кава/.test(q)) return 'cafe';
-    if(/ресторан|поїсти|повечеряти/.test(q)) return 'restaurant';
-    if(/магазин|крамниц/.test(q)) return 'shop';
-    if(/аптек/.test(q)) return 'pharmacy';
-    if(/парк|сквер/.test(q)) return 'park';
-    if(/заправ|азс/.test(q)) return 'fuel';
-    return null;
+    // anything else — including a plain street/address/place name with no trigger word —
+    // is treated as an address/place lookup, so streets typed on their own still work.
+    return { intent:'find_address', target:extractTarget(q) };
   }
 
   function extractTarget(q){
@@ -1100,7 +1186,7 @@ const AIEngine = (() => {
       if(context.lastPlace) return context.lastPlace;
       return null;
     }
-    const cat = detectCategoryUk(target.raw);
+    const cat = GeoEngine.detectCategory(target.raw);
     if(cat){
       const results = await GeoEngine.nearbyCategory(cat, userPos);
       if(results.length) return toPlaceLike(results[0]);
@@ -1127,6 +1213,7 @@ const AIEngine = (() => {
   const S = {
     theme: 'dark',
     userPos: [CFG.DEFAULT_CENTER.lat, CFG.DEFAULT_CENTER.lon],
+    locationSource: 'default',
     userHeading: 0,
     hasRealLocation: false,
     aiConnected: false,
@@ -1147,6 +1234,8 @@ const AIEngine = (() => {
     cafe:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',
     restaurant:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2M7 2v20M17 2v20M17 2a5 5 0 0 0-5 5v3a2 2 0 0 0 2 2h3"/></svg>',
     shop:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l-2 5v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7l-2-5z"/><path d="M4 7h16M10 11a2 2 0 0 1-4 0M18 11a2 2 0 0 1-4 0"/></svg>',
+    grocery:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+    hardware:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
     pharmacy:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
     park:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 8h-3l4 6h-4v6h-2v-6H7l4-6H8z"/></svg>',
     fuel:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"/><path d="M14 8l3 2v8a1.5 1.5 0 0 0 3 0v-6l-3-3"/></svg>',
@@ -1175,8 +1264,10 @@ const AIEngine = (() => {
   };
 
   /* ---------------- REAL MAP (Leaflet) ---------------- */
-  const map = L.map('leafletMap', { zoomControl:false, attributionControl:false, worldCopyJump:true })
-    .setView([S.userPos[0], S.userPos[1]], CFG.DEFAULT_ZOOM);
+  const map = L.map('leafletMap', {
+    zoomControl:false, attributionControl:false, worldCopyJump:true,
+    rotate:true, bearing:0, rotateControl:false, touchRotate:true, shiftKeyRotate:true
+  }).setView([S.userPos[0], S.userPos[1]], CFG.DEFAULT_ZOOM);
 
   const layerLight = L.tileLayer(CFG.TILE_LIGHT, { maxZoom:20, subdomains:'abcd' });
   const layerDark  = L.tileLayer(CFG.TILE_DARK,  { maxZoom:20, subdomains:'abcd' });
@@ -1232,7 +1323,7 @@ const AIEngine = (() => {
     const myToken = ++searchToken;
     resultsPanel.innerHTML = `<div class="result-empty">Пошук…</div>`;
     resultsPanel.classList.add('open');
-    const cat = AIEngine.parseIntent(q).intent==='find_place' ? AIEngine.parseIntent(q).category : detectCategoryLoose(q);
+    const cat = AIEngine.parseIntent(q).intent==='find_place' ? AIEngine.parseIntent(q).category : GeoEngine.detectCategory(q);
     let results = [];
     try{
       if(cat){
@@ -1245,16 +1336,6 @@ const AIEngine = (() => {
     }catch(e){ /* fall through with empty results */ }
     if(myToken !== searchToken) return; // stale
     renderResults(results);
-  }
-  function detectCategoryLoose(q){
-    const ql = q.toLowerCase();
-    if(/кав.ярн|кафе|каву|кава/.test(ql)) return 'cafe';
-    if(/ресторан|поїсти|повечеряти/.test(ql)) return 'restaurant';
-    if(/магазин|крамниц/.test(ql)) return 'shop';
-    if(/аптек/.test(ql)) return 'pharmacy';
-    if(/парк|сквер/.test(ql)) return 'park';
-    if(/заправ|азс/.test(ql)) return 'fuel';
-    return null;
   }
   function renderResults(results){
     resultsPanel.innerHTML='';
@@ -1554,7 +1635,7 @@ const AIEngine = (() => {
       S.userPos = pos.pos; S.userHeading = pos.heading;
       userMarker.setLatLng(pos.pos);
       const arrow = document.getElementById('userHeadingArrow');
-      if(arrow) arrow.style.transform = `translateX(-50%) rotate(${pos.heading}deg)`;
+      if(arrow) arrow.style.transform = `translateX(-50%) rotate(${pos.heading - (map.getBearing?map.getBearing():0)}deg)`;
       map.setView(pos.pos, map.getZoom(), { animate:false });
     }
     const turn = NavigationEngine.nextTurn();
@@ -1613,19 +1694,30 @@ const AIEngine = (() => {
     refreshBaseLayer();
     toast(S.layerMode==='satellite' ? 'Супутникові знімки (Esri World Imagery)' : 'Стандартна карта (OpenStreetMap)');
   };
-  $('compassBtn').onclick = () => { toast('Карта завжди зорієнтована на північ'); };
+  $('compassBtn').onclick = () => {
+    map.setBearing(0);
+    toast('Карту зорієнтовано на північ');
+  };
+  function updateCompassBtn(){
+    const bearing = map.getBearing ? map.getBearing() : 0;
+    $('compassBtn').style.transform = `rotate(${-bearing}deg)`;
+    $('compassBtn').classList.toggle('on', Math.abs(bearing) > 1);
+  }
+  map.on('rotate', updateCompassBtn);
+  updateCompassBtn();
   $('locateBtn').onclick = () => {
-    if(!navigator.geolocation){ toast('Геолокація недоступна в цьому браузері'); return; }
+    if(!navigator.geolocation){ fallbackToIpLocation(false); return; }
     toast('Визначаємо ваше місцезнаходження…');
     navigator.geolocation.getCurrentPosition(
       (gp) => {
         S.userPos = [gp.coords.latitude, gp.coords.longitude];
         S.hasRealLocation = true;
+        S.locationSource = 'gps';
         userMarker.setLatLng(S.userPos);
         map.setView(S.userPos, 16, { animate:true });
         toast('Розташування визначено');
       },
-      () => { toast('Доступ до GPS не надано'); },
+      () => { fallbackToIpLocation(false); /* GPS denied — use approximate IP-based location instead */ },
       { enableHighAccuracy:true, timeout:8000 }
     );
   };
@@ -1759,6 +1851,20 @@ const AIEngine = (() => {
   buildCapList('shadowCapList', SHADOW_CAPS);
 
   /* ---------------- INIT ---------------- */
+  async function fallbackToIpLocation(silent){
+    const ip = await GeoEngine.ipLocate();
+    if(ip){
+      S.userPos = ip.pos;
+      S.hasRealLocation = true;
+      S.locationSource = 'ip';
+      userMarker.setLatLng(S.userPos);
+      map.setView(S.userPos, CFG.DEFAULT_ZOOM, { animate:false });
+      if(!silent) toast(ip.label ? `Точне GPS недоступне — орієнтовне місце за IP: ${ip.label}` : 'Точне GPS недоступне — використано орієнтовне місце за IP');
+    } else if(!silent){
+      toast('Не вдалося визначити розташування — показано Київ за замовчуванням');
+    }
+  }
+
   function init(){
     applyTheme();
     setTimeout(()=>{ $('splash').classList.add('hide'); }, 1100);
@@ -1767,12 +1873,15 @@ const AIEngine = (() => {
         (gp) => {
           S.userPos = [gp.coords.latitude, gp.coords.longitude];
           S.hasRealLocation = true;
+          S.locationSource = 'gps';
           userMarker.setLatLng(S.userPos);
           map.setView(S.userPos, CFG.DEFAULT_ZOOM, { animate:false });
         },
-        () => { /* keep default center, no permission granted yet */ },
+        () => { fallbackToIpLocation(true); /* GPS denied/unavailable — fall back to IP-based location */ },
         { timeout:6000 }
       );
+    } else {
+      fallbackToIpLocation(true);
     }
     window.addEventListener('resize', ()=>{ map.invalidateSize(); positionSunDial(); });
   }
