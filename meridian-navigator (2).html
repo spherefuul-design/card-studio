@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Meridian — навігатор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root{
+  --radius-sm:10px; --radius-md:16px; --radius-lg:22px; --radius-pill:999px;
+  --ease:cubic-bezier(.22,.9,.32,1);
+  --font-ui:'Inter',system-ui,sans-serif;
+  --font-display:'Space Grotesk',system-ui,sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#0A0D14; --map-bg:#0D111C; --street:#1B2233; --street-main:#26304A; --street-edge:#0E1320;
+  --building:#171D2C; --building-top:#1E2740; --building-edge:#2A3450; --park:#0F231B; --park-edge:#1A3527;
+  --water:#0B1B2E;
+  --panel:rgba(16,20,31,0.82); --panel-solid:#12162296; --panel-solid2:#141926; --text:#EEF0F6; --text-dim:#8A92A8; --text-faint:#565F78;
+  --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.14);
+  --accent:#1FE0C4; --accent-2:#0FBCA3; --accent-ink:#00281F;
+  --ai:#9C8CFF; --ai-2:#7C68F5; --ai-ink:#1A1440;
+  --sun:#FFB020; --sun-2:#FF8F1F; --sun-ink:#331F00;
+  --danger:#FF5D6C; --ok:#3DDC84;
+  --shadow-fill: rgba(4,8,16,0.50); --shadow-fill-2: rgba(4,8,16,0.18);
+  --marker-ring: rgba(31,224,196,0.25);
+  --scrim: rgba(4,6,12,0.55);
+}
+:root[data-theme="light"]{
+  --bg:#EEF1F7; --map-bg:#E4E9F2; --street:#FFFFFF; --street-main:#FFFFFF; --street-edge:#C9D1E0;
+  --building:#D3D9E6; --building-top:#DFE4EF; --building-edge:#BCC4D6; --park:#DBEEDC; --park-edge:#BFDDC2;
+  --water:#C9DEF0;
+  --panel:rgba(255,255,255,0.80); --panel-solid:#FFFFFFE0; --panel-solid2:#FFFFFF; --text:#12151F; --text-dim:#5C6478; --text-faint:#9AA1B4;
+  --border:rgba(15,20,35,0.08); --border-strong:rgba(15,20,35,0.14);
+  --accent:#0C9C87; --accent-2:#0A8272; --accent-ink:#EAFBF7;
+  --ai:#6E58F0; --ai-2:#5A46D8; --ai-ink:#F1EEFF;
+  --sun:#E08A00; --sun-2:#C97600; --sun-ink:#FFF3DE;
+  --danger:#D6304A; --ok:#1EA65C;
+  --shadow-fill: rgba(35,45,70,0.30); --shadow-fill-2: rgba(35,45,70,0.10);
+  --marker-ring: rgba(12,156,135,0.18);
+  --scrim: rgba(20,24,36,0.35);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0; overscroll-behavior:none;}
+body{
+  font-family:var(--font-ui); background:#04050a; color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  height:100dvh; width:100vw; overflow:hidden;
+}
+.phone{
+  position:relative; width:100%; max-width:430px; height:100dvh; max-height:932px;
+  background:var(--bg); overflow:hidden; isolation:isolate;
+  transition:background .4s var(--ease);
+}
+@media (min-width:460px){
+  .phone{ border-radius:40px; box-shadow:0 30px 80px -20px rgba(0,0,0,.6), 0 0 0 10px #05060a, 0 0 0 12px #1a1d27; height:calc(100dvh - 40px); max-height:892px;}
+}
+button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer;}
+input{font-family:inherit;}
+::-webkit-scrollbar{display:none;}
+
+/* ============================================================
+   MAP LAYER
+============================================================ */
+#mapViewport{ position:absolute; inset:0; background:var(--map-bg); overflow:hidden; transition:background .5s var(--ease); z-index:1; }
+#leafletMap{ position:absolute; inset:0; background:var(--map-bg); }
+.leaflet-container{ background:var(--map-bg); font-family:var(--font-ui); }
+.leaflet-marker-icon{ background:none; border:none; }
+.map-attribution{
+  position:absolute; left:14px; bottom:6px; font-size:9.5px; color:var(--text-faint); letter-spacing:.02em; z-index:5; pointer-events:none;
+  font-family:var(--font-ui); background:var(--panel); padding:2px 7px; border-radius:6px; backdrop-filter:blur(6px);
+}
+.compass-north{ position:absolute; z-index:4; }
+.shadow-poly{ stroke:none; }
+
+/* shimmering sun-position dial (signature element) */
+#sunDial{
+  position:absolute; width:46px; height:46px; z-index:6; pointer-events:none;
+  transition:opacity .4s var(--ease), top .6s var(--ease), left .6s var(--ease);
+}
+
+/* ============================================================
+   TOP BAR
+============================================================ */
+.topbar{ position:absolute; top:0; left:0; right:0; z-index:30; padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 0; display:flex; flex-direction:column; gap:8px; pointer-events:none;}
+.topbar > *{ pointer-events:auto; }
+
+.searchbar{
+  display:flex; align-items:center; gap:10px; background:var(--panel); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border:1px solid var(--border); border-radius:var(--radius-pill); padding:12px 14px; box-shadow:0 8px 24px -8px rgba(0,0,0,.35);
+  transition:box-shadow .3s var(--ease), border-color .3s var(--ease);
+}
+.searchbar.focused{ border-color:var(--accent); box-shadow:0 0 0 3px var(--marker-ring), 0 8px 24px -8px rgba(0,0,0,.35); }
+.searchbar svg{ flex:none; opacity:.7; }
+.searchbar input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:15.5px; font-weight:500; min-width:0; }
+.searchbar input::placeholder{ color:var(--text-faint); font-weight:500; }
+.search-clear{ display:none; opacity:.6; padding:2px;}
+.search-clear.show{ display:flex; }
+.ai-mic-inline{
+  flex:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(145deg, var(--ai), var(--ai-2)); color:#fff; box-shadow:0 4px 12px -2px rgba(124,104,245,.5);
+}
+
+.results-panel{
+  background:var(--panel); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; max-height:0; opacity:0; transition:max-height .35s var(--ease), opacity .25s var(--ease);
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.4);
+}
+.results-panel.open{ max-height:400px; opacity:1; overflow-y:auto; }
+.result-item{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
+.result-item:last-child{ border-bottom:none; }
+.result-item:active{ background:rgba(128,128,128,.12); }
+.result-icon{ flex:none; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--street-edge); color:var(--accent); }
+.result-text{ min-width:0; flex:1; }
+.result-title{ font-size:14.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.result-sub{ font-size:12.5px; color:var(--text-dim); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.result-dist{ flex:none; font-size:12px; color:var(--text-faint); font-family:var(--font-display); }
+.result-empty{ padding:22px 16px; text-align:center; color:var(--text-dim); font-size:13.5px; }
+
+.category-row{ display:flex; gap:8px; overflow-x:auto; padding:2px 1px; }
+.chip{
+  flex:none; display:flex; align-items:center; gap:6px; padding:9px 14px; border-radius:var(--radius-pill);
+  background:var(--panel); border:1px solid var(--border); backdrop-filter:blur(14px); font-size:13px; font-weight:600; color:var(--text-dim);
+  transition:all .2s var(--ease);
+}
+.chip:active{ transform:scale(.96); }
+.chip.active{ background:var(--accent); color:var(--accent-ink); border-color:transparent; }
+
+/* ============================================================
+   FLOATING RIGHT CONTROLS
+============================================================ */
+.fab-stack{ position:absolute; right:14px; z-index:25; display:flex; flex-direction:column; gap:10px; transition:top .35s var(--ease), bottom .35s var(--ease); }
+.fab{
+  width:44px; height:44px; border-radius:14px; background:var(--panel-solid2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px -6px rgba(0,0,0,.35); color:var(--text);
+  transition:transform .15s var(--ease), background .2s;
+}
+.fab:active{ transform:scale(.92); }
+.fab.primary{ color:var(--accent); }
+.fab.on{ background:var(--accent); color:var(--accent-ink); }
+
+/* ============================================================
+   BOTTOM ACTION PILLS (AI connect / Shadow connect)
+============================================================ */
+.bottom-toolbelt{ position:absolute; left:14px; right:14px; z-index:24; display:flex; gap:10px; flex-wrap:wrap; transition:bottom .35s var(--ease), opacity .3s; }
+.pill-btn{
+  display:flex; align-items:center; gap:8px; padding:11px 16px; border-radius:var(--radius-pill);
+  font-size:13.5px; font-weight:700; box-shadow:0 8px 22px -8px rgba(0,0,0,.4); white-space:nowrap;
+  transition:transform .15s var(--ease), filter .2s; border:1px solid transparent;
+}
+.pill-btn:active{ transform:scale(.95); }
+.pill-ai{ background:linear-gradient(135deg, var(--ai), var(--ai-2)); color:#fff; }
+.pill-ai.connected{ background:var(--panel-solid2); color:var(--ai); border-color:var(--border); }
+.pill-shadow{ background:linear-gradient(135deg, var(--sun), var(--sun-2)); color:#1a1200; }
+.pill-shadow.connected{ background:var(--panel-solid2); color:var(--sun); border-color:var(--border); }
+.pill-shadow .dot, .pill-ai .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.5; }
+.pill-shadow.connected .dot{ background:var(--sun); opacity:1; box-shadow:0 0 6px var(--sun); }
+
+/* ============================================================
+   MY LOCATION MARKER
+============================================================ */
+.user-marker{ position:absolute; width:22px; height:22px; margin:-11px 0 0 -11px; z-index:8; }
+.user-marker .ring{ position:absolute; inset:-14px; border-radius:50%; background:radial-gradient(circle, var(--marker-ring), transparent 70%); animation:pulseRing 2.4s ease-out infinite; }
+.user-marker .core{ position:absolute; inset:0; border-radius:50%; background:#3B9CFF; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.4); }
+.user-marker .heading{ position:absolute; left:50%; top:-16px; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:10px solid #3B9CFF; transform:translateX(-50%); transform-origin:50% 22px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+@keyframes pulseRing{ 0%{transform:scale(.5); opacity:.9;} 100%{transform:scale(1.4); opacity:0;} }
+
+.place-marker{ position:absolute; width:34px; height:34px; margin:-34px 0 0 -17px; z-index:7; cursor:pointer; transition:transform .2s var(--ease); }
+.place-marker.selected{ transform:scale(1.15) translateY(-2px); z-index:9; }
+.place-marker .pin{ width:34px; height:34px; border-radius:50% 50% 50% 0; background:var(--accent); transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px -4px rgba(0,0,0,.5); }
+.place-marker .pin svg{ transform:rotate(45deg); color:var(--accent-ink); }
+.place-marker.dest .pin{ background:#FF5D6C; }
+.place-marker.dest .pin svg{ color:#fff; }
+
+/* ============================================================
+   BOTTOM SHEETS
+============================================================ */
+.sheet-scrim{ position:absolute; inset:0; background:var(--scrim); z-index:39; opacity:0; pointer-events:none; transition:opacity .25s var(--ease); }
+.sheet-scrim.show{ opacity:1; pointer-events:auto; }
+
+.sheet{
+  position:absolute; left:0; right:0; bottom:0; z-index:40; background:var(--panel-solid2); border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border); box-shadow:0 -20px 50px -20px rgba(0,0,0,.5);
+  transform:translateY(100%); transition:transform .38s var(--ease); max-height:82%; display:flex; flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.sheet.open{ transform:translateY(0); }
+.sheet-handle{ width:36px; height:4px; border-radius:2px; background:var(--border-strong); margin:10px auto 4px; flex:none; }
+.sheet-body{ padding:6px 20px 22px; overflow-y:auto; }
+.sheet-close{ position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:50%; background:var(--street-edge); display:flex; align-items:center; justify-content:center; color:var(--text-dim); z-index:2;}
+
+/* place detail sheet */
+.place-title{ font-family:var(--font-display); font-size:21px; font-weight:700; margin:2px 0 2px; padding-right:36px; }
+.place-sub{ font-size:13.5px; color:var(--text-dim); margin-bottom:4px; }
+.place-badges{ display:flex; gap:6px; margin:10px 0 4px; flex-wrap:wrap;}
+.badge{ font-size:11.5px; font-weight:700; padding:4px 9px; border-radius:8px; background:var(--street-edge); color:var(--text-dim); }
+.action-row{ display:flex; gap:8px; margin-top:16px; }
+.action-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px; border-radius:16px; background:var(--street-edge); font-size:11.5px; font-weight:600; color:var(--text-dim); transition:transform .15s; }
+.action-btn:active{ transform:scale(.94); }
+.action-btn.primary{ background:var(--accent); color:var(--accent-ink); }
+.action-btn svg{ width:20px; height:20px; }
+
+/* route options sheet */
+.route-card{ display:flex; align-items:center; gap:14px; padding:16px; border-radius:18px; border:1.5px solid var(--border); margin-bottom:10px; transition:all .2s var(--ease); cursor:pointer; }
+.route-card.selected{ border-color:var(--accent); background:linear-gradient(135deg, rgba(31,224,196,.08), transparent); }
+.route-card.shadow-mode.selected{ border-color:var(--sun); background:linear-gradient(135deg, rgba(255,176,32,.1), transparent); }
+.route-card:active{ transform:scale(.985); }
+.route-icon{ flex:none; width:46px; height:46px; border-radius:14px; background:var(--street-edge); display:flex; align-items:center; justify-content:center; }
+.route-card.shadow-mode .route-icon{ background:linear-gradient(145deg, var(--sun), var(--sun-2)); color:#1a1200; }
+.route-card:not(.shadow-mode) .route-icon{ color:var(--accent); }
+.route-info{ flex:1; min-width:0; }
+.route-time{ font-family:var(--font-display); font-size:19px; font-weight:700; }
+.route-time span{ font-size:12px; font-weight:600; color:var(--text-dim); margin-left:6px; }
+.route-meta{ font-size:12.5px; color:var(--text-dim); margin-top:2px; }
+.shade-bar{ height:5px; border-radius:3px; background:var(--street-edge); margin-top:8px; overflow:hidden; }
+.shade-bar-fill{ height:100%; background:linear-gradient(90deg, var(--sun-2), var(--sun)); border-radius:3px; }
+.route-recommend{ font-size:10.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--sun); margin-top:6px; }
+.start-nav-btn{ width:100%; padding:16px; border-radius:18px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:15.5px; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .15s; }
+.start-nav-btn:active{ transform:scale(.98); }
+.start-nav-btn.shadow-mode{ background:var(--sun); color:#1a1200; }
+
+/* modals: connect AI / connect shadow */
+.modal-header-icon{ width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+.modal-header-icon.ai{ background:linear-gradient(145deg, var(--ai), var(--ai-2)); color:#fff; }
+.modal-header-icon.sun{ background:linear-gradient(145deg, var(--sun), var(--sun-2)); color:#1a1200; }
+.modal-title{ font-family:var(--font-display); font-size:22px; font-weight:700; margin-bottom:8px; }
+.modal-desc{ font-size:14px; line-height:1.5; color:var(--text-dim); margin-bottom:18px; }
+.capability-list{ display:flex; flex-direction:column; gap:12px; margin-bottom:22px; }
+.capability{ display:flex; align-items:center; gap:12px; }
+.capability-dot{ flex:none; width:34px; height:34px; border-radius:11px; background:var(--street-edge); display:flex; align-items:center; justify-content:center; }
+.capability-text{ font-size:13.5px; font-weight:600; color:var(--text); }
+.connect-btn{ width:100%; padding:16px; border-radius:18px; font-weight:700; font-size:15.5px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .15s; }
+.connect-btn:active{ transform:scale(.98); }
+.connect-btn.ai{ background:linear-gradient(135deg, var(--ai), var(--ai-2)); color:#fff; }
+.connect-btn.sun{ background:linear-gradient(135deg, var(--sun), var(--sun-2)); color:#1a1200; }
+.mock-note{ font-size:11.5px; color:var(--text-faint); margin-top:14px; line-height:1.5; text-align:center; }
+
+/* AI chat drawer */
+.ai-sheet .sheet-body{ display:flex; flex-direction:column; height:60vh; padding-top:0;}
+.ai-log{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:8px 2px 12px; }
+.bubble{ max-width:82%; padding:11px 14px; border-radius:16px; font-size:14px; line-height:1.42; }
+.bubble.user{ align-self:flex-end; background:var(--accent); color:var(--accent-ink); border-bottom-right-radius:5px; font-weight:600;}
+.bubble.ai{ align-self:flex-start; background:var(--street-edge); color:var(--text); border-bottom-left-radius:5px; }
+.bubble.system{ align-self:center; background:none; color:var(--text-faint); font-size:11.5px; text-align:center; }
+.ai-input-row{ display:flex; align-items:center; gap:8px; padding-top:10px; border-top:1px solid var(--border); }
+.ai-text-input{ flex:1; background:var(--street-edge); border:1px solid var(--border); border-radius:var(--radius-pill); padding:11px 16px; font-size:14px; color:var(--text); outline:none; }
+.mic-big{ flex:none; width:46px; height:46px; border-radius:50%; background:linear-gradient(145deg, var(--ai), var(--ai-2)); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px -4px rgba(124,104,245,.6); transition:transform .15s;}
+.mic-big.listening{ animation:micPulse 1.1s ease-in-out infinite; }
+.mic-big:active{ transform:scale(.9); }
+@keyframes micPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(124,104,245,.6);} 50%{ box-shadow:0 0 0 14px rgba(124,104,245,0);} }
+.ai-suggest-row{ display:flex; gap:6px; flex-wrap:wrap; padding:0 0 10px; }
+.ai-suggest{ font-size:12px; font-weight:600; padding:7px 11px; border-radius:var(--radius-pill); background:var(--street-edge); color:var(--text-dim); }
+
+/* ============================================================
+   NAVIGATION HUD
+============================================================ */
+.nav-hud-top{
+  position:absolute; top:0; left:0; right:0; z-index:32; padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 0;
+  transform:translateY(-140%); transition:transform .4s var(--ease); pointer-events:none;
+}
+.nav-hud-top.show{ transform:translateY(0); }
+.turn-banner{
+  display:flex; align-items:center; gap:14px; background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:var(--accent-ink);
+  border-radius:22px; padding:16px 18px; box-shadow:0 12px 30px -10px rgba(0,0,0,.5); pointer-events:auto;
+}
+.turn-banner.shadow-mode{ background:linear-gradient(135deg, var(--sun-2), var(--sun)); color:#1a1200; }
+.turn-icon{ flex:none; width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,.28); display:flex; align-items:center; justify-content:center; }
+.turn-dist{ font-family:var(--font-display); font-size:24px; font-weight:700; line-height:1; }
+.turn-street{ font-size:13px; font-weight:600; opacity:.85; margin-top:3px; }
+.reroute-toast{
+  margin-top:8px; background:var(--panel-solid2); border:1px solid var(--border); border-radius:16px; padding:12px 14px; display:flex; align-items:center; gap:10px; pointer-events:auto;
+  box-shadow:0 10px 26px -10px rgba(0,0,0,.4); opacity:0; max-height:0; overflow:hidden; transition:all .3s var(--ease);
+}
+.reroute-toast.show{ opacity:1; max-height:120px; margin-bottom:8px;}
+.reroute-toast svg{ flex:none; color:var(--sun); }
+.reroute-toast .rt-text{ flex:1; font-size:12.5px; font-weight:600; line-height:1.35; }
+.reroute-actions{ display:flex; gap:6px; margin-top:6px; }
+.reroute-actions button{ font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:9px; }
+.reroute-actions .yes{ background:var(--sun); color:#1a1200; }
+.reroute-actions .no{ background:var(--street-edge); color:var(--text-dim); }
+
+.nav-hud-bottom{
+  position:absolute; left:14px; right:14px; bottom:0; z-index:32; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
+  transform:translateY(160%); transition:transform .4s var(--ease);
+}
+.nav-hud-bottom.show{ transform:translateY(0); }
+.nav-stats{ display:flex; align-items:center; background:var(--panel-solid2); border:1px solid var(--border); border-radius:20px; padding:14px 18px; box-shadow:0 -6px 24px -10px rgba(0,0,0,.4); gap:6px;}
+.nav-stat{ flex:1; text-align:center; }
+.nav-stat .val{ font-family:var(--font-display); font-size:18px; font-weight:700; }
+.nav-stat .lbl{ font-size:10.5px; color:var(--text-dim); margin-top:1px; font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+.nav-stat.eta .val{ color:var(--accent); }
+.nav-stop{ flex:none; width:46px; height:46px; border-radius:15px; background:var(--danger); color:#fff; display:flex; align-items:center; justify-content:center; margin-left:6px;}
+.nav-stop:active{ transform:scale(.92); }
+
+/* shadow forecast timeline */
+.forecast-strip{ position:absolute; left:14px; right:14px; z-index:22; display:flex; gap:6px; background:var(--panel); backdrop-filter:blur(16px); border:1px solid var(--border); border-radius:var(--radius-pill); padding:6px; transition:bottom .35s var(--ease), opacity .3s; overflow-x:auto;}
+.forecast-chip{ flex:1; text-align:center; padding:8px 4px; border-radius:var(--radius-pill); font-size:11.5px; font-weight:700; color:var(--text-dim); white-space:nowrap; }
+.forecast-chip.active{ background:var(--sun); color:#1a1200; }
+
+/* voice caption toast (subtitle for spoken guidance) */
+#voiceCaption{
+  position:absolute; left:50%; bottom:190px; transform:translateX(-50%) translateY(10px); z-index:33; max-width:88%;
+  background:var(--panel-solid2); border:1px solid var(--border); padding:9px 16px; border-radius:var(--radius-pill); font-size:12.5px; font-weight:600;
+  opacity:0; transition:all .3s var(--ease); pointer-events:none; text-align:center; box-shadow:0 8px 20px -8px rgba(0,0,0,.4);
+}
+#voiceCaption.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* toast (generic) */
+#toast{ position:absolute; left:50%; top:14px; transform:translateX(-50%) translateY(-30px); z-index:60; background:var(--panel-solid2); border:1px solid var(--border); padding:11px 18px; border-radius:var(--radius-pill); font-size:13px; font-weight:600; opacity:0; transition:all .3s var(--ease); box-shadow:0 10px 26px -10px rgba(0,0,0,.5); max-width:85%; text-align:center;}
+#toast.show{ opacity:1; transform:translateX(-50%) translateY(48px); }
+
+/* first-run splash */
+#splash{ position:absolute; inset:0; z-index:100; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; transition:opacity .5s var(--ease), visibility .5s; }
+#splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+.splash-logo{ width:64px; height:64px; border-radius:20px; background:linear-gradient(145deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; box-shadow:0 16px 40px -12px rgba(31,224,196,.5); animation:logoIn .7s var(--ease); }
+@keyframes logoIn{ from{ transform:scale(.5) rotate(-15deg); opacity:0;} to{ transform:scale(1) rotate(0); opacity:1;} }
+.splash-name{ font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:.01em; }
+.splash-tag{ font-size:12.5px; color:var(--text-dim); }
+
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-logo">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 22l10-6 10 6L12 2z" fill="#00281F"/></svg>
+    </div>
+    <div class="splash-name">Meridian</div>
+    <div class="splash-tag">Навігатор • Карта • Маршрути</div>
+  </div>
+
+  <!-- MAP -->
+  <div id="mapViewport">
+    <div id="leafletMap"></div>
+    <div id="sunDial"></div>
+  </div>
+  <div class="map-attribution" id="mapAttribution">© OpenStreetMap contributors</div>
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <div class="searchbar" id="searchBar">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="searchInput" type="text" placeholder="Куди прямуємо?" autocomplete="off">
+      <div class="search-clear" id="searchClear">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </div>
+      <button class="ai-mic-inline hidden" id="aiMicInline" title="Говорити з AI">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+      </button>
+    </div>
+    <div class="results-panel" id="resultsPanel"></div>
+    <div class="category-row" id="categoryRow"></div>
+  </div>
+
+  <!-- RIGHT FLOATING CONTROLS -->
+  <div class="fab-stack" id="fabStack" style="top:150px;">
+    <button class="fab" id="themeToggle" title="Тема"></button>
+    <button class="fab" id="layerToggle" title="Шар карти">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    </button>
+    <button class="fab" id="compassBtn" title="Компас">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="fab primary" id="locateBtn" title="Моє місцезнаходження">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+  </div>
+
+  <!-- BOTTOM TOOLBELT -->
+  <div class="bottom-toolbelt" id="bottomToolbelt" style="bottom:22px;">
+    <button class="pill-btn pill-ai" id="aiConnectPill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+      <span id="aiPillLabel">Підключити AI</span>
+    </button>
+    <button class="pill-btn pill-shadow" id="shadowConnectPill">
+      <span class="dot"></span>
+      <span id="shadowPillLabel">Тіні</span>
+    </button>
+  </div>
+
+  <!-- FORECAST TIMELINE (shadow mode) -->
+  <div class="forecast-strip hidden" id="forecastStrip" style="bottom:80px;"></div>
+
+  <!-- VOICE CAPTION -->
+  <div id="voiceCaption"></div>
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- NAV HUD -->
+  <div class="nav-hud-top" id="navHudTop">
+    <div class="turn-banner" id="turnBanner">
+      <div class="turn-icon" id="turnIcon"></div>
+      <div>
+        <div class="turn-dist" id="turnDist">300 м</div>
+        <div class="turn-street" id="turnStreet">поверніть праворуч на Хрещатик</div>
+      </div>
+    </div>
+    <div class="reroute-toast" id="rerouteToast">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <div class="rt-text">
+        Умови тіні змінилися. Знайдено маршрут із більшою кількістю тіні.
+        <div class="reroute-actions"><button class="yes" id="rerouteYes">Перебудувати</button><button class="no" id="rerouteNo">Залишити</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-hud-bottom" id="navHudBottom">
+    <div class="nav-stats">
+      <div class="nav-stat eta"><div class="val" id="navEta">--:--</div><div class="lbl">Прибуття</div></div>
+      <div class="nav-stat"><div class="val" id="navTime">0 хв</div><div class="lbl">Залишилось</div></div>
+      <div class="nav-stat"><div class="val" id="navDist">0 км</div><div class="lbl">Відстань</div></div>
+      <button class="nav-stop" id="navStopBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCRIM -->
+  <div class="sheet-scrim" id="sheetScrim"></div>
+
+  <!-- PLACE DETAIL SHEET -->
+  <div class="sheet" id="placeSheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="placeSheetClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="sheet-body">
+      <div class="place-title" id="placeTitle">—</div>
+      <div class="place-sub" id="placeSub">—</div>
+      <div class="place-badges" id="placeBadges"></div>
+      <div class="action-row">
+        <button class="action-btn primary" id="actRoute">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/><path d="M9 6v14M15 4v14"/></svg>
+          Маршрут
+        </button>
+        <button class="action-btn" id="actStart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Дорога
+        </button>
+        <button class="action-btn" id="actSave">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Зберегти
+        </button>
+        <button class="action-btn" id="actShare">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          Поділитись
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTE OPTIONS SHEET -->
+  <div class="sheet" id="routeSheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="routeSheetClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="sheet-body">
+      <div class="place-title" style="font-size:17px;">Виберіть маршрут</div>
+      <div class="place-sub" id="routeDestLabel">—</div>
+      <div id="routeCards" style="margin-top:14px;"></div>
+      <button class="start-nav-btn" id="startNavBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Почати дорогу
+      </button>
+    </div>
+  </div>
+
+  <!-- AI CONNECT MODAL -->
+  <div class="sheet" id="aiModal">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="aiModalClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="sheet-body">
+      <div class="modal-header-icon ai">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+      </div>
+      <div class="modal-title">AI-помічник</div>
+      <div class="modal-desc">Підключіть AI, щоб керувати навігацією голосом, шукати адреси та місця природною мовою і отримувати допомогу під час маршруту.</div>
+      <div class="capability-list" id="aiCapList"></div>
+      <button class="connect-btn ai" id="aiConnectBtn">Підключити</button>
+      <div class="mock-note">AI розпізнає наміри локально й викликає реальний пошук (OpenStreetMap/Nominatim) та маршрутизацію (OSRM). Голосове введення використовує розпізнавання мови браузера, якщо воно доступне.</div>
+    </div>
+  </div>
+
+  <!-- SHADOW CONNECT MODAL -->
+  <div class="sheet" id="shadowModal">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="shadowModalClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="sheet-body">
+      <div class="modal-header-icon sun">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </div>
+      <div class="modal-title">Динамічні тіні</div>
+      <div class="modal-desc">Переглядайте положення Сонця та тіні від навколишніх об'єктів у реальному часі та прокладайте маршрути з урахуванням затінення.</div>
+      <div class="capability-list" id="shadowCapList"></div>
+      <button class="connect-btn sun" id="shadowConnectBtn">Підключити</button>
+      <div class="mock-note">Положення Сонця розраховується за реальними астрономічними формулами для ваших координат і часу. Контури будівель — реальні дані OpenStreetMap (Overpass API); висота — з тегів будівлі, де вони відсутні, застосовується приблизна оцінка.</div>
+    </div>
+  </div>
+
+  <!-- AI CHAT DRAWER -->
+  <div class="sheet ai-sheet" id="aiSheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="aiSheetClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="sheet-body">
+      <div class="place-title" style="font-size:16px; display:flex; align-items:center; gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ai)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+        AI-помічник
+      </div>
+      <div class="ai-log" id="aiLog"></div>
+      <div class="ai-suggest-row" id="aiSuggestRow"></div>
+      <div class="ai-input-row">
+        <input class="ai-text-input" id="aiTextInput" type="text" placeholder="Напишіть або скажіть запит…">
+        <button class="mic-big" id="aiMicBig">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+/* ================================================================================================
+   MERIDIAN NAVIGATOR — REAL MAP ENGINE
+   Real map tiles (OpenStreetMap / Esri World Imagery via Leaflet), real geocoding (Nominatim),
+   real road routing (OSRM), real building footprints for shadows (Overpass/OSM).
+   Modules: Utils, SunEngine, GeoEngine, ShadowEngine, RouteEngine, ShadowRoutingEngine,
+            NavigationEngine, AIEngine, UI (wiring)
+================================================================================================ */
+
+/* ---------------------------------------------------------------------------
+   CONFIG
+--------------------------------------------------------------------------- */
+const CFG = {
+  DEFAULT_CENTER: { lat: 50.4501, lon: 30.5234 }, // Kyiv, Khreshchatyk — used until real location is known
+  DEFAULT_ZOOM: 15,
+  NOMINATIM: 'https://nominatim.openstreetmap.org',
+  OSRM: 'https://router.project-osrm.org',
+  OVERPASS: 'https://overpass-api.de/api/interpreter',
+  TILE_LIGHT: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  TILE_DARK: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  TILE_SAT: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  ATTR_STD: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+  ATTR_SAT: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
+};
+
+/* ---------------------------------------------------------------------------
+   UTILS
+--------------------------------------------------------------------------- */
+const Utils = (() => {
+  const rad = d => d * Math.PI / 180;
+  const deg = r => r * 180 / Math.PI;
+  function fmtDist(m){
+    if(m < 1000) return Math.round(m/10)*10 + ' м';
+    return (m/1000).toFixed(1).replace('.0','') + ' км';
+  }
+  function fmtDur(sec){
+    const min = Math.round(sec/60);
+    if(min < 60) return min + ' хв';
+    const h = Math.floor(min/60), m = min%60;
+    return h + ' год ' + (m? m+' хв':'');
+  }
+  function fmtClock(date){
+    return date.getHours().toString().padStart(2,'0')+':'+date.getMinutes().toString().padStart(2,'0');
+  }
+  // haversine distance in meters between [lat,lon] pairs
+  function dist(a,b){
+    const R = 6371000;
+    const phi1=rad(a[0]), phi2=rad(b[0]), dphi=rad(b[0]-a[0]), dlmb=rad(b[1]-a[1]);
+    const s = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlmb/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+  }
+  // initial compass bearing from a to b, in degrees
+  function bearing(a,b){
+    const phi1=rad(a[0]), phi2=rad(b[0]), dlmb=rad(b[1]-a[1]);
+    const y = Math.sin(dlmb)*Math.cos(phi2);
+    const x = Math.cos(phi1)*Math.sin(phi2) - Math.sin(phi1)*Math.cos(phi2)*Math.cos(dlmb);
+    return (deg(Math.atan2(y,x))+360)%360;
+  }
+  // meters-per-degree helpers (local flat approximation, fine at city scale)
+  function metersPerDegLat(){ return 110540; }
+  function metersPerDegLon(lat){ return 111320*Math.cos(rad(lat)); }
+  function llToXY(latlon, ref){
+    return [ (latlon[1]-ref[1]) * metersPerDegLon(ref[0]), (ref[0]-latlon[0]) * metersPerDegLat() ];
+  }
+  function xyToLL(xy, ref){
+    return [ ref[0] - xy[1]/metersPerDegLat(), ref[1] + xy[0]/metersPerDegLon(ref[0]) ];
+  }
+  // point-in-polygon (ray casting), pt/poly in local xy
+  function pointInPoly(pt, poly){
+    let inside = false;
+    for(let i=0, j=poly.length-1; i<poly.length; j=i++){
+      const xi=poly[i][0], yi=poly[i][1], xj=poly[j][0], yj=poly[j][1];
+      const intersect = ((yi>pt[1]) !== (yj>pt[1])) && (pt[0] < (xj-xi)*(pt[1]-yi)/(yj-yi+1e-12)+xi);
+      if(intersect) inside = !inside;
+    }
+    return inside;
+  }
+  // convex hull (monotone chain), points in local xy
+  function convexHull(points){
+    const pts = points.slice().sort((a,b)=> a[0]-b[0] || a[1]-b[1]);
+    if(pts.length<3) return pts;
+    const cross=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+    const lower=[]; for(const p of pts){ while(lower.length>=2 && cross(lower[lower.length-2],lower[lower.length-1],p)<=0) lower.pop(); lower.push(p); }
+    const upper=[]; for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; while(upper.length>=2 && cross(upper[upper.length-2],upper[upper.length-1],p)<=0) upper.pop(); upper.push(p); }
+    upper.pop(); lower.pop();
+    return lower.concat(upper);
+  }
+  // small deterministic hash -> [0,1) for fallback building height variety
+  function hash01(str){
+    let h = 2166136261;
+    for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return ((h>>>0) % 10000) / 10000;
+  }
+  function debounce(fn, ms){ let t=null; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+  return { rad, deg, fmtDist, fmtDur, fmtClock, dist, bearing, llToXY, xyToLL, pointInPoly, convexHull, hash01, debounce };
+})();
+
+/* ---------------------------------------------------------------------------
+   SUN ENGINE — real solar-position astronomy (SunCalc-style algorithm)
+--------------------------------------------------------------------------- */
+const SunEngine = (() => {
+  const rad = Math.PI/180;
+  const dayMs = 1000*60*60*24, J1970=2440588, J2000=2451545;
+  const e = rad*23.4397; // obliquity of the Earth
+
+  function toJulian(date){ return date.valueOf()/dayMs - 0.5 + J1970; }
+  function toDays(date){ return toJulian(date) - J2000; }
+  function solarMeanAnomaly(d){ return rad*(357.5291 + 0.98560028*d); }
+  function eclipticLongitude(M){
+    const C = rad*(1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M));
+    const P = rad*102.9372;
+    return M + C + P + Math.PI;
+  }
+  function declination(l){ return Math.asin(Math.sin(e)*Math.sin(l)); }
+  function rightAscension(l){ return Math.atan2(Math.sin(l)*Math.cos(e), Math.cos(l)); }
+  function siderealTime(d, lw){ return rad*(280.16 + 360.9856235*d) - lw; }
+  function azimuthCalc(H, phi, dec){ return Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(phi) - Math.tan(dec)*Math.cos(phi)); }
+  function altitudeCalc(H, phi, dec){ return Math.asin(Math.sin(phi)*Math.sin(dec) + Math.cos(phi)*Math.cos(dec)*Math.cos(H)); }
+
+  // returns { altitude (rad), altitudeDeg, azimuth (deg, compass 0=N,90=E,180=S,270=W) }
+  function getPosition(date, lat, lon){
+    const lw = rad * -lon, phi = rad * lat;
+    const d = toDays(date);
+    const M = solarMeanAnomaly(d);
+    const L = eclipticLongitude(M);
+    const dec = declination(L);
+    const ra = rightAscension(L);
+    const H = siderealTime(d, lw) - ra;
+    const az = azimuthCalc(H, phi, dec); // radians, 0 = south, +west
+    const alt = altitudeCalc(H, phi, dec);
+    let compassAz = (az/rad + 180) % 360;
+    if(compassAz<0) compassAz += 360;
+    return { altitude: alt, altitudeDeg: alt/rad, azimuth: compassAz };
+  }
+  return { getPosition };
+})();
+
+/* ---------------------------------------------------------------------------
+   GEO ENGINE — real geocoding (Nominatim) + real POI/building data (Overpass)
+--------------------------------------------------------------------------- */
+const GeoEngine = (() => {
+  const CATEGORY_TAGS = {
+    cafe:       { label:'Кав\u2019ярня',  q:'["amenity"="cafe"]' },
+    restaurant: { label:'Ресторан',   q:'["amenity"="restaurant"]' },
+    shop:       { label:'Магазин',    q:'["shop"]' },
+    pharmacy:   { label:'Аптека',     q:'["amenity"="pharmacy"]' },
+    park:       { label:'Парк',       q:'["leisure"="park"]' },
+    fuel:       { label:'Заправка',   q:'["amenity"="fuel"]' },
+  };
+
+  async function fetchJSON(url, opts){
+    const res = await fetch(url, opts);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+
+  // free-text address / place search
+  async function search(query, near){
+    const params = new URLSearchParams({
+      format:'jsonv2', q:query, limit:'8', addressdetails:'1', 'accept-language':'uk'
+    });
+    if(near) params.set('viewbox', `${near[1]-0.08},${near[0]+0.06},${near[1]+0.08},${near[0]-0.06}`);
+    if(near) params.set('bounded','0');
+    const data = await fetchJSON(`${CFG.NOMINATIM}/search?${params.toString()}`);
+    return data.map(d => ({
+      type:'address', title: shortLabel(d), sub: d.display_name,
+      lat: parseFloat(d.lat), lon: parseFloat(d.lon), category:null, osmId:d.osm_id
+    }));
+  }
+
+  function shortLabel(d){
+    const a = d.address || {};
+    const parts = [a.road || a.pedestrian || a.footway || d.name, a.house_number].filter(Boolean);
+    if(parts.length) return parts.join(' ');
+    return (d.display_name||'').split(',').slice(0,2).join(',').trim();
+  }
+
+  async function reverse(lat, lon){
+    const params = new URLSearchParams({ format:'jsonv2', lat, lon, 'accept-language':'uk' });
+    try{
+      const d = await fetchJSON(`${CFG.NOMINATIM}/reverse?${params.toString()}`);
+      return { title: shortLabel(d), sub: d.display_name, lat, lon };
+    }catch(e){ return { title:'Обрана точка', sub:`${lat.toFixed(5)}, ${lon.toFixed(5)}`, lat, lon }; }
+  }
+
+  // real nearby POIs by category via Overpass "around"
+  async function nearbyCategory(category, near, radiusM){
+    radiusM = radiusM || 1500;
+    const tag = CATEGORY_TAGS[category];
+    if(!tag || !near) return [];
+    const q = `[out:json][timeout:20];(node${tag.q}(around:${radiusM},${near[0]},${near[1]});way${tag.q}(around:${radiusM},${near[0]},${near[1]}););out center 30;`;
+    try{
+      const data = await fetchJSON(CFG.OVERPASS, { method:'POST', body:new URLSearchParams({data:q}) });
+      const list = (data.elements||[]).map(el=>{
+        const lat = el.lat || (el.center && el.center.lat);
+        const lon = el.lon || (el.center && el.center.lon);
+        if(lat==null || lon==null) return null;
+        const name = (el.tags && el.tags.name) || tag.label;
+        const addr = el.tags ? [el.tags['addr:street'], el.tags['addr:housenumber']].filter(Boolean).join(' ') : '';
+        return { id:'osm'+el.type+el.id, name, address: addr, lat, lon, category, categoryLabel:tag.label,
+          distance: Utils.dist(near,[lat,lon]) };
+      }).filter(Boolean).sort((a,b)=>a.distance-b.distance);
+      return list.slice(0,15);
+    }catch(e){ return []; }
+  }
+
+  // real building footprints (for shadow rendering) within a lat/lon bounding box
+  async function buildingsInBounds(bounds){
+    // bounds: {south,west,north,east}
+    const q = `[out:json][timeout:25];way["building"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});out geom;`;
+    const data = await fetchJSON(CFG.OVERPASS, { method:'POST', body:new URLSearchParams({data:q}) });
+    return (data.elements||[]).filter(el=>el.type==='way' && el.geometry && el.geometry.length>2).map(el=>{
+      const footprintLL = el.geometry.map(pt=>[pt.lat, pt.lon]);
+      let height = null;
+      if(el.tags){
+        if(el.tags.height) height = parseFloat(el.tags.height);
+        else if(el.tags['building:levels']) height = parseFloat(el.tags['building:levels'])*3.2;
+      }
+      if(!height || isNaN(height)) height = 9 + Utils.hash01('w'+el.id)*24;
+      return { id:'bld'+el.id, footprintLL, height };
+    });
+  }
+
+  return { search, reverse, nearbyCategory, buildingsInBounds, CATEGORY_TAGS };
+})();
+
+/* ---------------------------------------------------------------------------
+   SHADOW ENGINE — projects real building footprints into shadow polygons
+--------------------------------------------------------------------------- */
+const ShadowEngine = (() => {
+  const MAX_LEN = 260; // cap for very low sun angles
+
+  function bearingToVec(bearingDeg){
+    const b = Utils.rad(bearingDeg);
+    return [Math.sin(b), -Math.cos(b)]; // x=east, y=south(down); north = -y
+  }
+
+  // buildings: [{footprintLL:[[lat,lon]...], height}], sunPos: {altitudeDeg, azimuth}
+  // returns { shadows: [{poly:[[lat,lon]...]}], night }
+  function computeShadows(buildings, sunPos){
+    if(sunPos.altitudeDeg <= 0.3) return { shadows: [], night:true };
+    const shadowBearing = (sunPos.azimuth + 180) % 360;
+    const [dx,dy] = bearingToVec(shadowBearing);
+    const shadows = [];
+    for(const b of buildings){
+      if(!b.footprintLL || b.footprintLL.length<3 || b.height<=0) continue;
+      const ref = b.footprintLL[0];
+      const footXY = b.footprintLL.map(p => Utils.llToXY(p, ref));
+      let len = b.height / Math.tan(Utils.rad(sunPos.altitudeDeg));
+      len = Math.min(len, MAX_LEN);
+      const offset = [dx*len, dy*len];
+      const projected = footXY.map(p => [p[0]+offset[0], p[1]+offset[1]]);
+      const hullXY = Utils.convexHull(footXY.concat(projected));
+      const poly = hullXY.map(p => Utils.xyToLL(p, ref));
+      shadows.push({ id:b.id, poly, len, refLL:ref, footXY });
+    }
+    return { shadows, night:false, shadowBearing };
+  }
+
+  // pt: [lat,lon]. shadow.poly is in lat/lon — test in local xy around shadow's own ref for accuracy
+  function isPointShaded(pt, shadows){
+    for(const s of shadows){
+      const ptXY = Utils.llToXY(pt, s.refLL);
+      const polyXY = s.poly.map(p => Utils.llToXY(p, s.refLL));
+      if(Utils.pointInPoly(ptXY, polyXY)) return true;
+    }
+    return false;
+  }
+
+  return { computeShadows, isPointShaded };
+})();
+
+/* ---------------------------------------------------------------------------
+   ROUTE ENGINE — real road routing via OSRM
+--------------------------------------------------------------------------- */
+const RouteEngine = (() => {
+  const MODIFIER_DIR = {
+    'left':'left', 'slight left':'left', 'sharp left':'left',
+    'right':'right', 'slight right':'right', 'sharp right':'right',
+  };
+
+  function turnsFromSteps(steps){
+    const turns = [];
+    let cum = 0;
+    for(let i=0;i<steps.length;i++){
+      const st = steps[i];
+      if(i>0){
+        const mod = st.maneuver && st.maneuver.modifier;
+        const dir = MODIFIER_DIR[mod];
+        if(dir){ turns.push({ cumDist: cum, direction: dir, street: st.name || '' }); }
+      }
+      cum += st.distance || 0;
+    }
+    return turns;
+  }
+
+  // from/to: [lat,lon]. returns array of route objects or null
+  async function route(from, to, opts){
+    opts = opts || {};
+    const coordsStr = `${from[1]},${from[0]};${to[1]},${to[0]}`;
+    const params = new URLSearchParams({
+      overview:'full', geometries:'geojson', steps:'true',
+      alternatives: opts.alternatives ? 'true':'false'
+    });
+    const url = `${CFG.OSRM}/route/v1/driving/${coordsStr}?${params.toString()}`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('OSRM HTTP '+res.status);
+    const data = await res.json();
+    if(data.code !== 'Ok' || !data.routes || !data.routes.length) return null;
+    return data.routes.map((r, idx) => {
+      const coordsLL = r.geometry.coordinates.map(c => [c[1], c[0]]);
+      const steps = (r.legs[0] && r.legs[0].steps) || [];
+      return {
+        key: idx===0? 'fastest':'alt'+idx,
+        coordsLL, distanceM: r.distance, durationSec: r.duration,
+        turns: turnsFromSteps(steps), steps
+      };
+    });
+  }
+
+  return { route };
+})();
+
+/* ---------------------------------------------------------------------------
+   SHADOW ROUTING ENGINE — scores candidate routes by real building shade coverage
+--------------------------------------------------------------------------- */
+const ShadowRoutingEngine = (() => {
+  const SAMPLE_STEP = 22; // meters between samples along route
+
+  function scoreRoute(route, buildings, departureDate, avgSpeedMps){
+    const pts = route.coordsLL;
+    if(pts.length<2 || !route.distanceM) return { ...route, shadePct:0 };
+    let sampled=0, shaded=0, cum=0;
+    const shadowCache = {};
+    for(let i=0;i<pts.length-1;i++){
+      const segLen = Utils.dist(pts[i], pts[i+1]);
+      const steps = Math.max(1, Math.round(segLen/SAMPLE_STEP));
+      for(let s=0;s<steps;s++){
+        const t = s/steps;
+        const pt = [ pts[i][0]+(pts[i+1][0]-pts[i][0])*t, pts[i][1]+(pts[i+1][1]-pts[i][1])*t ];
+        const cumDist = cum + segLen*t;
+        const etaSec = cumDist/avgSpeedMps;
+        const bucket = Math.round(etaSec/60);
+        let shadows = shadowCache[bucket];
+        if(!shadows){
+          const future = new Date(departureDate.getTime()+etaSec*1000);
+          const sunPos = SunEngine.getPosition(future, pt[0], pt[1]);
+          shadows = ShadowEngine.computeShadows(buildings, sunPos).shadows;
+          shadowCache[bucket] = shadows;
+        }
+        sampled++;
+        if(ShadowEngine.isPointShaded(pt, shadows)) shaded++;
+      }
+      cum += segLen;
+    }
+    const shadePct = sampled? Math.round((shaded/sampled)*100) : 0;
+    return { ...route, shadePct };
+  }
+
+  function evaluate(routes, buildings, departureDate){
+    return routes.map(r => scoreRoute(r, buildings, departureDate, r.distanceM/Math.max(1,r.durationSec)));
+  }
+
+  function recommend(scoredRoutes){
+    if(!scoredRoutes.length) return null;
+    const fastest = scoredRoutes.reduce((a,b)=> a.durationSec<b.durationSec?a:b);
+    const viable = scoredRoutes.filter(r => r.durationSec <= fastest.durationSec*1.45);
+    return viable.reduce((a,b)=> (b.shadePct>a.shadePct)?b:a, viable[0] || fastest);
+  }
+
+  return { evaluate, recommend };
+})();
+
+/* ---------------------------------------------------------------------------
+   NAVIGATION ENGINE — simulated progression along a real route polyline
+--------------------------------------------------------------------------- */
+const NavigationEngine = (() => {
+  let state = null;
+  const listeners = [];
+  function on(fn){ listeners.push(fn); }
+  function emit(evt, data){ listeners.forEach(fn=>fn(evt,data)); }
+
+  function buildCumulative(coordsLL){
+    const cum = [0];
+    for(let i=0;i<coordsLL.length-1;i++) cum.push(cum[i] + Utils.dist(coordsLL[i], coordsLL[i+1]));
+    return cum;
+  }
+
+  function start(route, opts){
+    opts = opts || {};
+    const cum = buildCumulative(route.coordsLL);
+    const speed = Math.max(1, route.distanceM/Math.max(1,route.durationSec));
+    state = {
+      route, cum, progressDist:0, announced:new Set(),
+      shadowMode: !!opts.shadowMode, speedMps: speed
+    };
+  }
+  function stop(){ state = null; }
+  function isActive(){ return !!state; }
+  function getState(){ return state; }
+
+  function tick(dtSec){
+    if(!state) return null;
+    state.progressDist = Math.min(state.route.distanceM, state.progressDist + state.speedMps*dtSec);
+    checkAnnouncements();
+    if(state.progressDist >= state.route.distanceM - 3){ emit('arrive'); }
+    return { progressDist: state.progressDist };
+  }
+
+  function currentPosition(){
+    if(!state) return null;
+    const { cum, route } = state;
+    let d = state.progressDist;
+    let i = 0;
+    while(i < cum.length-2 && cum[i+1] < d) i++;
+    const segLen = cum[i+1]-cum[i] || 1;
+    const t = Math.max(0, Math.min(1, (d-cum[i])/segLen));
+    const a = route.coordsLL[i], b = route.coordsLL[Math.min(route.coordsLL.length-1,i+1)];
+    const pos = [ a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t ];
+    const heading = Utils.bearing(a,b);
+    return { pos, heading };
+  }
+
+  function nextTurn(){
+    if(!state) return null;
+    const upcoming = state.route.turns.filter(t => t.cumDist >= state.progressDist - 5);
+    if(!upcoming.length) return null;
+    const t = upcoming[0];
+    return { direction:t.direction, street:t.street, distanceTo: t.cumDist - state.progressDist };
+  }
+
+  function checkAnnouncements(){
+    const turn = nextTurn();
+    if(!turn) return;
+    const key = 'turn_'+Math.round(turn.distanceTo/300);
+    if(turn.distanceTo <= 300 && turn.distanceTo > 250 && !state.announced.has(key+'_300')){
+      state.announced.add(key+'_300');
+      emit('voice', `Через 300 метрів поверніть ${turn.direction==='right'?'праворуч':'ліворуч'}${turn.street? ' на '+turn.street:''}.`);
+    }
+    if(turn.distanceTo <= 100 && turn.distanceTo > 80 && !state.announced.has(key+'_100')){
+      state.announced.add(key+'_100');
+      emit('voice', `Через 100 метрів поверніть ${turn.direction==='right'?'праворуч':'ліворуч'}.`);
+    }
+    if(turn.distanceTo <= 15 && !state.announced.has(key+'_now')){
+      state.announced.add(key+'_now');
+      emit('voice', `Поверніть ${turn.direction==='right'?'праворуч':'ліворуч'}.`);
+    }
+    const remainDist = state.route.distanceM - state.progressDist;
+    if(remainDist <= 30 && !state.announced.has('arrive_soon')){
+      state.announced.add('arrive_soon');
+      emit('voice', 'Ви прибули до місця призначення.');
+    }
+  }
+
+  return { start, stop, isActive, tick, currentPosition, nextTurn, getState, on };
+})();
+
+/* ---------------------------------------------------------------------------
+   AI ENGINE — Ukrainian intent parsing; calls real Geo/Route engines (async)
+--------------------------------------------------------------------------- */
+const AIEngine = (() => {
+  const context = { lastPlaces:[], lastPlace:null, lastRoutes:null };
+
+  function normalize(s){ return s.toLowerCase().trim(); }
+
+  function parseIntent(text){
+    const q = normalize(text);
+    if(/зупин|стоп|скасуй навігац/.test(q)) return { intent:'stop_nav' };
+    if(/почни дорогу|почати дорогу|поїхали|давай туди|розпочати навігац|стартуй/.test(q) && !/знайд|пошук/.test(q)) return { intent:'start_nav' };
+    if(/по тін|у тіні|тіньовий/.test(q) && /(маршрут|веди|проклад|дорог)/.test(q)) return { intent:'route', mode:'shadow', target:extractTarget(q) };
+    if(/найшвидш|швидкий маршрут|коротш/.test(q)) return { intent:'route', mode:'fastest', target:extractTarget(q) };
+    if(/веди мене|проклад(и)? маршрут|побудуй маршрут|доведи мене/.test(q)) return { intent:'route', mode:/тін/.test(q)?'shadow':'fastest', target:extractTarget(q) };
+    const cat = detectCategoryUk(q);
+    if(cat) return { intent:'find_place', category:cat, mode: /тін/.test(q)?'shadow':null, target:extractTarget(q) };
+    if(/знайди|шукай|пошук/.test(q)) return { intent:'find_address', target:extractTarget(q) };
+    return { intent:'unknown', raw:text };
+  }
+
+  function detectCategoryUk(q){
+    if(/кав.ярн|кафе|каву|кава/.test(q)) return 'cafe';
+    if(/ресторан|поїсти|повечеряти/.test(q)) return 'restaurant';
+    if(/магазин|крамниц/.test(q)) return 'shop';
+    if(/аптек/.test(q)) return 'pharmacy';
+    if(/парк|сквер/.test(q)) return 'park';
+    if(/заправ|азс/.test(q)) return 'fuel';
+    return null;
+  }
+
+  function extractTarget(q){
+    if(/туди|цього|цей|перш(ого|ий)/.test(q)) return { ref:'contextual', raw:q };
+    return { ref:'free', raw:q.replace(/^(знайди|шукай|пошук|веди мене до|проклади маршрут до|побудуй маршрут до|доведи мене до)\s*/,'').trim() };
+  }
+
+  async function respond(text, deps){
+    // deps: { userPos, shadowConnected, departureDate }
+    const parsed = parseIntent(text);
+    let reply = '';
+    const actions = [];
+
+    if(parsed.intent==='stop_nav'){
+      reply = 'Добре, зупиняю навігацію.';
+      actions.push({ type:'stop_nav' });
+      return { reply, actions, parsed };
+    }
+    if(parsed.intent==='start_nav'){
+      if(context.lastRoutes){
+        reply = 'Запускаю навігацію.';
+        actions.push({ type:'start_nav' });
+      } else {
+        reply = 'Спочатку оберіть місце призначення — скажіть, наприклад, «знайди аптеку поруч».';
+      }
+      return { reply, actions, parsed };
+    }
+
+    if(parsed.intent==='find_place'){
+      const results = await GeoEngine.nearbyCategory(parsed.category, deps.userPos);
+      if(!results.length){
+        reply = 'На жаль, нічого не знайдено поруч.';
+        return { reply, actions, parsed };
+      }
+      context.lastPlaces = results;
+      context.lastPlace = results[0];
+      const nearest = results[0];
+      reply = `Я знайшов кілька варіантів: ${nearest.categoryLabel.toLowerCase()}. Найближчий — «${nearest.name}», приблизно за ${Utils.fmtDist(nearest.distance)}.`;
+      actions.push({ type:'show_places', places:results.slice(0,8) });
+      if(parsed.mode==='shadow') reply += ' Показати маршрут по тіні до нього?';
+      return { reply, actions, parsed };
+    }
+
+    if(parsed.intent==='find_address'){
+      const place = await resolveTarget(parsed.target, deps.userPos);
+      if(!place){
+        reply = 'Я не зміг знайти адресу. Спробуйте назвати вулицю, місце або орієнтир.';
+        return { reply, actions, parsed };
+      }
+      context.lastPlace = place;
+      reply = `Я знайшов ${place.title || place.name}${place.address? ' ('+place.address+')':''}.`;
+      actions.push({ type:'show_place', place });
+      return { reply, actions, parsed };
+    }
+
+    if(parsed.intent==='route'){
+      const place = await resolveTarget(parsed.target, deps.userPos);
+      if(!place){
+        reply = 'Скажіть, куди прокласти маршрут — назву місця або адресу.';
+        return { reply, actions, parsed };
+      }
+      context.lastPlace = place;
+      actions.push({ type:'build_route', place, mode: parsed.mode });
+      reply = parsed.mode==='shadow' ? `Будую маршрут по тіні до ${place.title||place.name}…` : `Будую маршрут до ${place.title||place.name}…`;
+      return { reply, actions, parsed };
+    }
+
+    reply = 'Я можу шукати адреси й місця, прокладати реальні маршрути та керувати навігацією. Спробуйте: «знайди кав\u2019ярню поруч» або «проклади маршрут по тіні».';
+    return { reply, actions, parsed };
+  }
+
+  async function resolveTarget(target, userPos){
+    if(!target) return null;
+    if(target.ref==='contextual'){
+      if(/перш/.test(target.raw) && context.lastPlaces.length) return toPlaceLike(context.lastPlaces[0]);
+      if(context.lastPlace) return context.lastPlace;
+      return null;
+    }
+    const cat = detectCategoryUk(target.raw);
+    if(cat){
+      const results = await GeoEngine.nearbyCategory(cat, userPos);
+      if(results.length) return toPlaceLike(results[0]);
+    }
+    if(!target.raw) return null;
+    const results = await GeoEngine.search(target.raw, userPos);
+    if(results.length) return { title:results[0].title, address:results[0].sub, lat:results[0].lat, lon:results[0].lon };
+    return null;
+  }
+  function toPlaceLike(p){ return { title:p.name, address:p.address, lat:p.lat, lon:p.lon, category:p.category }; }
+
+  function setLastRoutes(routes){ context.lastRoutes = routes; }
+  function reset(){ context.lastPlaces=[]; context.lastPlace=null; context.lastRoutes=null; }
+
+  return { respond, parseIntent, setLastRoutes, reset, context };
+})();
+
+/* ================================================================================================
+   UI / APPLICATION LAYER — wires engines to DOM
+================================================================================================ */
+(function App(){
+  const $ = id => document.getElementById(id);
+
+  const S = {
+    theme: 'dark',
+    userPos: [CFG.DEFAULT_CENTER.lat, CFG.DEFAULT_CENTER.lon],
+    userHeading: 0,
+    hasRealLocation: false,
+    aiConnected: false,
+    shadowConnected: false,
+    shadowActive: false,
+    selectedPlace: null,
+    scoredRoutes: null,
+    activeCards: null,
+    selectedRouteIdx: 0,
+    forecastOffsetMin: 0,
+    navActive: false,
+    layerMode: 'standard',
+    buildingsCache: [],
+  };
+
+  /* ---------------- ICONS ---------------- */
+  const ICONS = {
+    cafe:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',
+    restaurant:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2M7 2v20M17 2v20M17 2a5 5 0 0 0-5 5v3a2 2 0 0 0 2 2h3"/></svg>',
+    shop:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l-2 5v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7l-2-5z"/><path d="M4 7h16M10 11a2 2 0 0 1-4 0M18 11a2 2 0 0 1-4 0"/></svg>',
+    pharmacy:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
+    park:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 8h-3l4 6h-4v6h-2v-6H7l4-6H8z"/></svg>',
+    fuel:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M4 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"/><path d="M14 8l3 2v8a1.5 1.5 0 0 0 3 0v-6l-3-3"/></svg>',
+    address:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  };
+  const turnIconSvg = (dir) => dir==='right'
+    ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>'
+    : dir==='left'
+    ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>'
+    : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------------- THEME ---------------- */
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', S.theme);
+    $('themeToggle').innerHTML = S.theme==='dark'
+      ? '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>'
+      : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>';
+  }
+  $('themeToggle').onclick = () => {
+    S.theme = S.theme==='dark'?'light':'dark';
+    applyTheme(); refreshBaseLayer();
+    if(S.scoredRoutes) renderRoute(S.activeCards[S.selectedRouteIdx], S.activeCards[S.selectedRouteIdx].isShadow);
+    if(S.shadowActive) renderShadows();
+  };
+
+  /* ---------------- REAL MAP (Leaflet) ---------------- */
+  const map = L.map('leafletMap', { zoomControl:false, attributionControl:false, worldCopyJump:true })
+    .setView([S.userPos[0], S.userPos[1]], CFG.DEFAULT_ZOOM);
+
+  const layerLight = L.tileLayer(CFG.TILE_LIGHT, { maxZoom:20, subdomains:'abcd' });
+  const layerDark  = L.tileLayer(CFG.TILE_DARK,  { maxZoom:20, subdomains:'abcd' });
+  const layerSat   = L.tileLayer(CFG.TILE_SAT,   { maxZoom:19 });
+  let currentBaseLayer = null;
+  function refreshBaseLayer(){
+    const target = S.layerMode==='satellite' ? layerSat : (S.theme==='dark' ? layerDark : layerLight);
+    if(currentBaseLayer && currentBaseLayer!==target) map.removeLayer(currentBaseLayer);
+    if(!map.hasLayer(target)) target.addTo(map);
+    currentBaseLayer = target;
+    $('mapAttribution').innerHTML = S.layerMode==='satellite' ? CFG.ATTR_SAT : CFG.ATTR_STD;
+  }
+  refreshBaseLayer();
+
+  const routeLayer = L.layerGroup().addTo(map);
+  const shadowLayer = L.layerGroup().addTo(map);
+  const placeLayer = L.layerGroup().addTo(map);
+
+  const userMarker = L.marker(S.userPos, {
+    icon: L.divIcon({ className:'user-marker', iconSize:[22,22], iconAnchor:[11,11],
+      html:'<div class="ring"></div><div class="heading" id="userHeadingArrow"></div><div class="core"></div>' })
+  }).addTo(map);
+
+  let placeMarkers = {};
+  function ensurePlaceMarkers(list){
+    Object.values(placeMarkers).forEach(m=>placeLayer.removeLayer(m));
+    placeMarkers = {};
+    list.forEach(p => {
+      const icon = L.divIcon({
+        className:'place-marker'+(p.__isDest?' dest':''), iconSize:[34,34], iconAnchor:[17,34],
+        html:`<div class="pin">${ICONS[p.icon]||ICONS[p.category]||ICONS.address}</div>`
+      });
+      const m = L.marker([p.lat, p.lon], { icon }).addTo(placeLayer);
+      m.on('click', ()=> selectPlace(p));
+      placeMarkers[p.id || (p.lat+','+p.lon)] = m;
+    });
+  }
+
+  /* ---------------- SEARCH UI ---------------- */
+  const searchInput = $('searchInput'), resultsPanel = $('resultsPanel'), searchBar = $('searchBar');
+  let searchToken = 0;
+  searchInput.addEventListener('focus', ()=> searchBar.classList.add('focused'));
+  searchInput.addEventListener('blur', ()=> setTimeout(()=>searchBar.classList.remove('focused'),150));
+  const debouncedSearch = Utils.debounce((q)=>runSearch(q), 420);
+  searchInput.addEventListener('input', ()=>{
+    $('searchClear').classList.toggle('show', !!searchInput.value);
+    if(!searchInput.value.trim()){ closeResults(); return; }
+    debouncedSearch(searchInput.value);
+  });
+  $('searchClear').onclick = ()=>{ searchInput.value=''; $('searchClear').classList.remove('show'); closeResults(); };
+
+  async function runSearch(q){
+    const myToken = ++searchToken;
+    resultsPanel.innerHTML = `<div class="result-empty">Пошук…</div>`;
+    resultsPanel.classList.add('open');
+    const cat = AIEngine.parseIntent(q).intent==='find_place' ? AIEngine.parseIntent(q).category : detectCategoryLoose(q);
+    let results = [];
+    try{
+      if(cat){
+        const places = await GeoEngine.nearbyCategory(cat, S.userPos);
+        results = places.map(p=>({ type:'place', title:p.name, sub:`${p.categoryLabel} · ${p.address||'поруч'}`, lat:p.lat, lon:p.lon, category:p.category, distance:p.distance }));
+      } else {
+        results = await GeoEngine.search(q, S.userPos);
+        results = results.map(r=>({ ...r, distance: Utils.dist(S.userPos, [r.lat,r.lon]) }));
+      }
+    }catch(e){ /* fall through with empty results */ }
+    if(myToken !== searchToken) return; // stale
+    renderResults(results);
+  }
+  function detectCategoryLoose(q){
+    const ql = q.toLowerCase();
+    if(/кав.ярн|кафе|каву|кава/.test(ql)) return 'cafe';
+    if(/ресторан|поїсти|повечеряти/.test(ql)) return 'restaurant';
+    if(/магазин|крамниц/.test(ql)) return 'shop';
+    if(/аптек/.test(ql)) return 'pharmacy';
+    if(/парк|сквер/.test(ql)) return 'park';
+    if(/заправ|азс/.test(ql)) return 'fuel';
+    return null;
+  }
+  function renderResults(results){
+    resultsPanel.innerHTML='';
+    if(!results.length){
+      resultsPanel.innerHTML = `<div class="result-empty">Нічого не знайдено. Спробуйте іншу адресу або назву.</div>`;
+    } else {
+      results.forEach(r => {
+        const item = document.createElement('div');
+        item.className='result-item';
+        item.innerHTML = `<div class="result-icon">${ICONS[r.category]||ICONS.address}</div>
+          <div class="result-text"><div class="result-title">${r.title}</div><div class="result-sub">${r.sub}</div></div>
+          ${r.distance!=null?`<div class="result-dist">${Utils.fmtDist(r.distance)}</div>`:''}`;
+        item.onclick = () => onResultChosen(r);
+        resultsPanel.appendChild(item);
+      });
+    }
+    resultsPanel.classList.add('open');
+  }
+  function closeResults(){ resultsPanel.classList.remove('open'); resultsPanel.innerHTML=''; }
+
+  function onResultChosen(r){
+    searchInput.blur(); closeResults(); searchInput.value='';
+    selectPlace({ id:r.title+r.lat+r.lon, name:r.title, address:r.sub, lat:r.lat, lon:r.lon, icon:r.category, category:r.category });
+  }
+
+  /* category chips */
+  const CATS = [
+    {key:'cafe', label:'Кав\u2019ярні'}, {key:'restaurant', label:'Ресторани'}, {key:'shop', label:'Магазини'},
+    {key:'pharmacy', label:'Аптеки'}, {key:'park', label:'Парки'}, {key:'fuel', label:'Заправки'}
+  ];
+  function buildCategoryRow(){
+    const row = $('categoryRow'); row.innerHTML='';
+    CATS.forEach(c => {
+      const chip = document.createElement('button');
+      chip.className='chip'; chip.innerHTML = `${ICONS[c.key]}<span>${c.label}</span>`;
+      chip.onclick = async () => {
+        const active = chip.classList.contains('active');
+        [...row.children].forEach(el=>el.classList.remove('active'));
+        if(active){ closeResults(); return; }
+        chip.classList.add('active');
+        renderResults([{ type:'place', title:'Пошук…', sub:'' }]);
+        const places = await GeoEngine.nearbyCategory(c.key, S.userPos);
+        renderResults(places.map(p=>({ type:'place', title:p.name, sub:`${p.categoryLabel} · ${p.address||'поруч'}`, lat:p.lat, lon:p.lon, category:p.category, distance:p.distance })));
+      };
+      row.appendChild(chip);
+    });
+  }
+  buildCategoryRow();
+
+  /* ---------------- PLACE SHEET ---------------- */
+  function selectPlace(p){
+    S.selectedPlace = p;
+    ensurePlaceMarkers([{...p, __isDest:true}]);
+    $('placeTitle').textContent = p.name;
+    $('placeSub').textContent = p.address || `${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
+    const badges = $('placeBadges'); badges.innerHTML='';
+    if(p.category){
+      const cat = CATS.find(c=>c.key===p.category);
+      if(cat){ const b=document.createElement('div'); b.className='badge'; b.textContent=cat.label; badges.appendChild(b); }
+    }
+    openSheet('placeSheet');
+    map.setView([p.lat, p.lon], Math.max(map.getZoom(),16), { animate:true });
+  }
+  $('placeSheetClose').onclick = ()=> closeSheet('placeSheet');
+  $('actRoute').onclick = () => { closeSheet('placeSheet'); buildRouteTo(S.selectedPlace); };
+  $('actStart').onclick = () => { closeSheet('placeSheet'); buildRouteTo(S.selectedPlace, {autoStart:true}); };
+  $('actSave').onclick = () => toast('Місце збережено');
+  $('actShare').onclick = () => toast('Посилання на місце скопійовано');
+
+  /* ---------------- ROUTING UI (real OSRM roads) ---------------- */
+  function bboxOfCoords(coordsList, pad){
+    let south=90,north=-90,west=180,east=-180;
+    coordsList.forEach(([lat,lon])=>{ south=Math.min(south,lat); north=Math.max(north,lat); west=Math.min(west,lon); east=Math.max(east,lon); });
+    return { south:south-pad, north:north+pad, west:west-pad, east:east+pad };
+  }
+
+  async function buildRouteTo(place, opts){
+    opts = opts || {};
+    if(!place){ toast('Спершу оберіть місце призначення'); return; }
+    toast('Прокладаю маршрут по реальних дорогах…');
+    let routes;
+    try{
+      routes = await RouteEngine.route(S.userPos, [place.lat, place.lon], { alternatives:true });
+    }catch(e){ toast('Сервіс маршрутизації (OSRM) недоступний'); return; }
+    if(!routes || !routes.length){ toast('Не вдалося прокласти маршрут між цими точками'); return; }
+
+    let scored = routes.map(r=>({...r}));
+    if(S.shadowConnected){
+      if(routes[0].distanceM <= 2500){
+        try{
+          const bounds = bboxOfCoords(routes.flatMap(r=>r.coordsLL), 0.0015);
+          const buildings = await GeoEngine.buildingsInBounds(bounds);
+          scored = ShadowRoutingEngine.evaluate(routes, buildings, simClock());
+        }catch(e){ /* fall back to unscored routes */ }
+      } else {
+        toast('Маршрут задовгий для точної оцінки тіні');
+      }
+    }
+    S.scoredRoutes = scored;
+    AIEngine.setLastRoutes(scored);
+    renderRouteSheet(place, opts.preferShadow);
+    if(opts.autoStart){ doStartNav(); }
+    else { openSheet('routeSheet'); }
+  }
+
+  function renderRouteSheet(place, preferShadow){
+    $('routeDestLabel').textContent = place.name + (place.address? ' · '+place.address:'');
+    const wrap = $('routeCards'); wrap.innerHTML='';
+    let list = S.scoredRoutes.slice().sort((a,b)=>a.durationSec-b.durationSec);
+    const fastest = list[0];
+    const cards = [ { ...fastest, cardLabel:'Звичайний маршрут', isShadow:false } ];
+    if(S.shadowConnected){
+      const rec = ShadowRoutingEngine.recommend(S.scoredRoutes);
+      if(rec){ cards.push({ ...rec, cardLabel:'Маршрут по тіні', isShadow:true }); }
+    }
+    S.selectedRouteIdx = (preferShadow && cards.length>1) ? 1 : 0;
+
+    cards.forEach((r, idx) => {
+      const card = document.createElement('div');
+      card.className = 'route-card' + (r.isShadow?' shadow-mode':'') + (S.selectedRouteIdx===idx?' selected':'');
+      card.innerHTML = `
+        <div class="route-icon">${r.isShadow? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/></svg>'}</div>
+        <div class="route-info">
+          <div class="route-time">${Utils.fmtDur(r.durationSec)} <span>${Utils.fmtDist(r.distanceM)}</span></div>
+          <div class="route-meta">${r.isShadow? 'Оптимізовано за реальною тінню будівель' : 'Найкоротший час у дорозі · реальні дороги OSM'}</div>
+          ${S.shadowConnected && r.shadePct!=null ? `<div class="shade-bar"><div class="shade-bar-fill" style="width:${r.shadePct}%"></div></div><div class="route-meta">${r.shadePct}% маршруту в тіні</div>` : ''}
+          ${r.isShadow ? '<div class="route-recommend">Рекомендовано в режимі тіні</div>' : ''}
+        </div>`;
+      card.onclick = () => {
+        S.selectedRouteIdx = idx;
+        [...wrap.children].forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        renderRoute(r, r.isShadow);
+        S.activeCards = cards;
+        $('startNavBtn').classList.toggle('shadow-mode', r.isShadow);
+      };
+      wrap.appendChild(card);
+    });
+    S.activeCards = cards;
+    renderRoute(cards[S.selectedRouteIdx], cards[S.selectedRouteIdx].isShadow);
+    $('startNavBtn').classList.toggle('shadow-mode', cards[S.selectedRouteIdx].isShadow);
+  }
+  $('routeSheetClose').onclick = ()=> { closeSheet('routeSheet'); clearRoute(); };
+  $('startNavBtn').onclick = () => { closeSheet('routeSheet'); doStartNav(); };
+
+  function renderRoute(route, shadowMode){
+    routeLayer.clearLayers();
+    if(!route || !route.coordsLL) return;
+    const color = shadowMode ? cssVar('--sun') : cssVar('--accent');
+    L.polyline(route.coordsLL, { color, weight:14, opacity:0.22, lineCap:'round', lineJoin:'round', interactive:false }).addTo(routeLayer);
+    L.polyline(route.coordsLL, { color, weight:6, opacity:1, lineCap:'round', lineJoin:'round', interactive:false }).addTo(routeLayer);
+  }
+  function clearRoute(){ routeLayer.clearLayers(); }
+
+  /* ---------------- SHADOWS (real OSM building footprints) ---------------- */
+  let toastOnceSet = new Set();
+  function toastOnce(key, msg){ if(toastOnceSet.has(key)) return; toastOnceSet.add(key); toast(msg); }
+
+  let shadowLoadToken = 0;
+  async function loadBuildingsForView(){
+    if(map.getZoom() < 15){ toastOnce('zoom_shadow','Наблизьте карту, щоб побачити тіні реальних будівель'); shadowLayer.clearLayers(); return; }
+    const b = map.getBounds();
+    const bounds = { south:b.getSouth(), north:b.getNorth(), west:b.getWest(), east:b.getEast() };
+    const myToken = ++shadowLoadToken;
+    try{
+      const buildings = await GeoEngine.buildingsInBounds(bounds);
+      if(myToken !== shadowLoadToken) return;
+      S.buildingsCache = buildings;
+      renderShadows();
+    }catch(e){ toastOnce('overpass_fail','Не вдалося завантажити дані будівель з OpenStreetMap'); }
+  }
+  const debouncedLoadBuildings = Utils.debounce(loadBuildingsForView, 700);
+  map.on('moveend', ()=>{ if(S.shadowActive) debouncedLoadBuildings(); });
+
+  let simTimeBase = new Date();
+  function simClock(){
+    const d = new Date(simTimeBase.getTime());
+    d.setMinutes(d.getMinutes() + S.forecastOffsetMin);
+    return d;
+  }
+  function renderShadows(){
+    shadowLayer.clearLayers();
+    if(!S.shadowActive) return;
+    const now = simClock();
+    const c = map.getCenter();
+    const sunPos = SunEngine.getPosition(now, c.lat, c.lng);
+    const { shadows, night } = ShadowEngine.computeShadows(S.buildingsCache, sunPos);
+    if(night){ toastOnce('night', 'Сонце за горизонтом — тіні наразі не розраховуються'); return; }
+    shadows.forEach(s => {
+      L.polygon(s.poly, { color:'transparent', weight:0, fillColor: cssVar('--shadow-fill'), fillOpacity:1, interactive:false }).addTo(shadowLayer);
+    });
+  }
+
+  function positionSunDial(){
+    const dial = $('sunDial');
+    if(!S.shadowActive){ dial.style.opacity='0'; return; }
+    const now = simClock();
+    const c = map.getCenter();
+    const sunPos = SunEngine.getPosition(now, c.lat, c.lng);
+    if(sunPos.altitudeDeg <= 0.3){ dial.style.opacity='0'; return; }
+    dial.style.opacity='1';
+    const vp = $('mapViewport').getBoundingClientRect();
+    const R = Math.min(vp.width,vp.height)*0.34;
+    const cx = vp.width/2, cy = vp.height*0.30;
+    const altFactor = 1 - Math.min(1, sunPos.altitudeDeg/70);
+    const rad = Utils.rad(sunPos.azimuth);
+    const x = cx + Math.sin(rad)*R*(0.4+0.6*altFactor);
+    const y = cy - Math.cos(rad)*R*(0.4+0.6*altFactor)*0.6 + R*0.25;
+    dial.style.left = x+'px'; dial.style.top = y+'px';
+    dial.innerHTML = `<svg width="46" height="46" viewBox="0 0 46 46">
+      <circle cx="23" cy="23" r="11" fill="var(--sun)" opacity="0.95"/>
+      <circle cx="23" cy="23" r="17" fill="none" stroke="var(--sun)" stroke-width="1.4" opacity="0.35"/>
+      <circle cx="23" cy="23" r="21" fill="none" stroke="var(--sun)" stroke-width="1" opacity="0.18"/>
+    </svg>`;
+  }
+
+  $('shadowConnectPill').onclick = () => { if(S.shadowConnected) toggleShadowMode(); else openSheet('shadowModal'); };
+  $('shadowModalClose').onclick = () => closeSheet('shadowModal');
+  $('shadowConnectBtn').onclick = () => {
+    S.shadowConnected = true;
+    closeSheet('shadowModal');
+    $('shadowPillLabel').textContent = 'Тіні: Увімк';
+    $('shadowConnectPill').classList.add('connected');
+    toast('Режим тіней підключено');
+    activateShadowMode();
+  };
+  function toggleShadowMode(){
+    S.shadowActive = !S.shadowActive;
+    $('shadowPillLabel').textContent = S.shadowActive ? 'Тіні: Увімк' : 'Тіні: Вимк';
+    if(S.shadowActive) activateShadowMode(); else deactivateShadowMode();
+  }
+  function activateShadowMode(){
+    S.shadowActive = true;
+    loadBuildingsForView();
+    buildForecastStrip();
+    $('forecastStrip').classList.remove('hidden');
+    positionSunDial();
+  }
+  function deactivateShadowMode(){
+    S.shadowActive = false;
+    shadowLayer.clearLayers();
+    $('forecastStrip').classList.add('hidden');
+    $('sunDial').style.opacity='0';
+  }
+  function buildForecastStrip(){
+    const strip = $('forecastStrip'); strip.innerHTML='';
+    const offsets = [0,10,20,30,60];
+    offsets.forEach(off => {
+      const chip = document.createElement('div');
+      chip.className = 'forecast-chip' + (off===S.forecastOffsetMin?' active':'');
+      chip.textContent = off===0? 'Зараз' : '+'+off+' хв';
+      chip.onclick = () => {
+        S.forecastOffsetMin = off;
+        [...strip.children].forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        renderShadows(); positionSunDial();
+      };
+      strip.appendChild(chip);
+    });
+  }
+  setInterval(()=>{ if(S.shadowActive && !S.navActive){ renderShadows(); positionSunDial(); } }, 20000);
+
+  /* ---------------- NAVIGATION ---------------- */
+  function doStartNav(){
+    const cards = S.activeCards;
+    if(!cards) return;
+    const chosen = cards[S.selectedRouteIdx];
+    NavigationEngine.start(chosen, { shadowMode: chosen.isShadow });
+    S.navActive = true;
+    renderRoute(chosen, chosen.isShadow);
+    $('navHudTop').classList.add('show');
+    $('navHudBottom').classList.add('show');
+    $('bottomToolbelt').style.bottom = '-100px';
+    $('fabStack').style.top = '-200px';
+    $('forecastStrip').classList.add('hidden');
+    updateNavHud();
+    speak(chosen.isShadow ? 'Розпочинаю навігацію маршрутом по тіні.' : 'Розпочинаю навігацію.');
+  }
+  $('navStopBtn').onclick = () => stopNav();
+  function stopNav(){
+    NavigationEngine.stop();
+    S.navActive = false;
+    $('navHudTop').classList.remove('show');
+    $('navHudBottom').classList.remove('show');
+    $('bottomToolbelt').style.bottom = '22px';
+    $('fabStack').style.top='150px';
+    if(S.shadowActive) $('forecastStrip').classList.remove('hidden');
+    clearRoute();
+    toast('Навігацію зупинено');
+  }
+
+  function updateNavHud(){
+    const st = NavigationEngine.getState();
+    if(!st) return;
+    const pos = NavigationEngine.currentPosition();
+    if(pos){
+      S.userPos = pos.pos; S.userHeading = pos.heading;
+      userMarker.setLatLng(pos.pos);
+      const arrow = document.getElementById('userHeadingArrow');
+      if(arrow) arrow.style.transform = `translateX(-50%) rotate(${pos.heading}deg)`;
+      map.setView(pos.pos, map.getZoom(), { animate:false });
+    }
+    const turn = NavigationEngine.nextTurn();
+    if(turn){
+      $('turnIcon').innerHTML = turnIconSvg(turn.direction);
+      $('turnDist').textContent = Utils.fmtDist(Math.max(0,turn.distanceTo));
+      $('turnStreet').textContent = `поверніть ${turn.direction==='right'?'праворуч':'ліворуч'}${turn.street? ' на '+turn.street:''}`;
+    } else {
+      $('turnIcon').innerHTML = turnIconSvg('straight');
+      $('turnDist').textContent = 'Прямо';
+      $('turnStreet').textContent = 'рухайтесь по маршруту';
+    }
+    $('turnBanner').classList.toggle('shadow-mode', st.shadowMode);
+    const remainDist = Math.max(0, st.route.distanceM - st.progressDist);
+    const remainSec = remainDist / st.speedMps;
+    $('navTime').textContent = Utils.fmtDur(remainSec);
+    $('navDist').textContent = Utils.fmtDist(remainDist);
+    const eta = new Date(Date.now() + remainSec*1000);
+    $('navEta').textContent = Utils.fmtClock(eta);
+  }
+
+  NavigationEngine.on((evt, data) => {
+    if(evt==='voice'){ speak(data); }
+    if(evt==='arrive'){
+      setTimeout(()=>{ toast('Ви прибули до місця призначення'); stopNav(); }, 600);
+    }
+  });
+
+  let navTimer=null;
+  function navLoop(){
+    if(S.navActive && !document.hidden){
+      NavigationEngine.tick(0.6);
+      updateNavHud();
+      if(S.shadowConnected && NavigationEngine.getState() && NavigationEngine.getState().shadowMode){
+        maybeSuggestReroute();
+      }
+    }
+    navTimer = setTimeout(navLoop, 600);
+  }
+  navLoop();
+
+  let lastRerouteCheck=0;
+  function maybeSuggestReroute(){
+    const now = Date.now();
+    if(now - lastRerouteCheck < 15000) return;
+    lastRerouteCheck = now;
+    if(Math.random() < 0.12){ $('rerouteToast').classList.add('show'); }
+  }
+  $('rerouteYes').onclick = () => { $('rerouteToast').classList.remove('show'); toast('Маршрут перебудовано з урахуванням тіні'); };
+  $('rerouteNo').onclick = () => { $('rerouteToast').classList.remove('show'); };
+
+  /* ---------------- MAP CONTROLS ---------------- */
+  $('layerToggle').onclick = () => {
+    S.layerMode = S.layerMode==='standard' ? 'satellite' : 'standard';
+    $('layerToggle').classList.toggle('on', S.layerMode==='satellite');
+    refreshBaseLayer();
+    toast(S.layerMode==='satellite' ? 'Супутникові знімки (Esri World Imagery)' : 'Стандартна карта (OpenStreetMap)');
+  };
+  $('compassBtn').onclick = () => { toast('Карта завжди зорієнтована на північ'); };
+  $('locateBtn').onclick = () => {
+    if(!navigator.geolocation){ toast('Геолокація недоступна в цьому браузері'); return; }
+    toast('Визначаємо ваше місцезнаходження…');
+    navigator.geolocation.getCurrentPosition(
+      (gp) => {
+        S.userPos = [gp.coords.latitude, gp.coords.longitude];
+        S.hasRealLocation = true;
+        userMarker.setLatLng(S.userPos);
+        map.setView(S.userPos, 16, { animate:true });
+        toast('Розташування визначено');
+      },
+      () => { toast('Доступ до GPS не надано'); },
+      { enableHighAccuracy:true, timeout:8000 }
+    );
+  };
+
+  /* ---------------- AI CHAT ---------------- */
+  function openAiChat(){ openSheet('aiSheet'); if(!$('aiLog').childElementCount) pushAiBubble('ai','Привіт! Чим можу допомогти? Спробуйте «знайди ресторан поруч» або «проклади маршрут по тіні».'); }
+  $('aiSheetClose').onclick = ()=> closeSheet('aiSheet');
+  function pushAiBubble(role, text){
+    const log = $('aiLog');
+    const b = document.createElement('div'); b.className='bubble '+role; b.textContent=text;
+    log.appendChild(b); log.scrollTop = log.scrollHeight;
+  }
+
+  const AI_SUGGESTIONS = ['Знайди кав\u2019ярню поруч','Проклади маршрут по тіні','Де тут аптека?','Почни дорогу'];
+  function buildAiSuggestRow(){
+    const row = $('aiSuggestRow'); row.innerHTML='';
+    AI_SUGGESTIONS.forEach(s=>{ const c=document.createElement('button'); c.className='ai-suggest'; c.textContent=s; c.onclick=()=>handleAiText(s); row.appendChild(c); });
+  }
+  buildAiSuggestRow();
+
+  $('aiTextInput').addEventListener('keydown', e=>{ if(e.key==='Enter' && aiTextInput.value.trim()){ handleAiText(aiTextInput.value.trim()); aiTextInput.value=''; } });
+
+  async function handleAiText(text){
+    pushAiBubble('user', text);
+    const res = await AIEngine.respond(text, { userPos:S.userPos, shadowConnected:S.shadowConnected, departureDate: simClock() });
+    pushAiBubble('ai', res.reply);
+    await executeAiActions(res.actions);
+    speak(res.reply);
+  }
+
+  async function executeAiActions(actions){
+    for(const a of actions){
+      if(a.type==='show_place'){
+        selectPlace({ id:(a.place.title||a.place.name)+a.place.lat+a.place.lon, name:a.place.title||a.place.name, address:a.place.address, lat:a.place.lat, lon:a.place.lon, icon:'address' });
+      }
+      if(a.type==='show_places'){
+        ensurePlaceMarkers(a.places.map(p=>({...p, __isDest:false})));
+        if(a.places[0]) map.setView([a.places[0].lat, a.places[0].lon], Math.max(map.getZoom(),15));
+      }
+      if(a.type==='build_route'){
+        const place = { id:'ai_'+(a.place.title||a.place.name), name:a.place.title||a.place.name, address:a.place.address, lat:a.place.lat, lon:a.place.lon };
+        selectPlace(place);
+        await buildRouteTo(place, { preferShadow: a.mode==='shadow' });
+        openSheet('routeSheet');
+        closeSheet('aiSheet');
+      }
+      if(a.type==='start_nav'){ closeSheet('aiSheet'); doStartNav(); }
+      if(a.type==='stop_nav'){ stopNav(); }
+    }
+  }
+
+  /* speech recognition (voice input) with graceful fallback */
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null, listening=false;
+  function toggleListening(){
+    if(!SpeechRec){ toast('Розпізнавання голосу недоступне в цьому браузері — введіть текст'); $('aiTextInput').focus(); return; }
+    if(listening){ recognizer && recognizer.stop(); return; }
+    recognizer = new SpeechRec();
+    recognizer.lang = 'uk-UA'; recognizer.interimResults=false; recognizer.maxAlternatives=1;
+    recognizer.onstart = () => { listening=true; $('aiMicBig').classList.add('listening'); };
+    recognizer.onerror = () => { listening=false; $('aiMicBig').classList.remove('listening'); toast('Не вдалося розпізнати мовлення'); };
+    recognizer.onend = () => { listening=false; $('aiMicBig').classList.remove('listening'); };
+    recognizer.onresult = (e) => { const text = e.results[0][0].transcript; handleAiText(text); };
+    try{ recognizer.start(); }catch(e){ toast('Мікрофон недоступний'); }
+  }
+  $('aiMicBig').onclick = toggleListening;
+
+  $('aiConnectPill').onclick = () => { if(S.aiConnected) openAiChat(); else openSheet('aiModal'); };
+  $('aiModalClose').onclick = () => closeSheet('aiModal');
+  $('aiConnectBtn').onclick = () => {
+    S.aiConnected = true;
+    closeSheet('aiModal');
+    $('aiPillLabel').textContent = 'Говорити з AI';
+    $('aiConnectPill').classList.add('connected');
+    $('aiMicInline').classList.remove('hidden');
+    toast('AI підключено');
+    pushAiBubble('system', 'AI-помічник підключено. Спробуйте: «знайди кав\u2019ярню поруч».');
+  };
+  $('aiMicInline').onclick = () => openAiChat();
+
+  /* ---------------- VOICE (TTS) ---------------- */
+  function speak(text){
+    showCaption(text);
+    if('speechSynthesis' in window){
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'uk-UA'; u.rate = 1.02;
+        const voices = speechSynthesis.getVoices();
+        const uk = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('uk'));
+        if(uk) u.voice = uk;
+        speechSynthesis.speak(u);
+      }catch(e){}
+    }
+  }
+  function showCaption(text){
+    const c = $('voiceCaption'); c.textContent = text; c.classList.add('show');
+    clearTimeout(showCaption._t);
+    showCaption._t = setTimeout(()=>c.classList.remove('show'), 3200);
+  }
+
+  /* ---------------- TOAST ---------------- */
+  function toast(msg){
+    const t=$('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2600);
+  }
+
+  /* ---------------- SHEET HELPERS ---------------- */
+  function openSheet(id){ $(id).classList.add('open'); $('sheetScrim').classList.add('show'); }
+  function closeSheet(id){ $(id).classList.remove('open'); $('sheetScrim').classList.remove('show'); }
+  $('sheetScrim').onclick = () => { ['placeSheet','routeSheet','aiModal','shadowModal','aiSheet'].forEach(closeSheet); };
+
+  /* ---------------- AI / SHADOW CONNECT MODAL CONTENT ---------------- */
+  const AI_CAPS = [
+    {icon:ICONS.address, text:'Голосовий пошук реальних адрес і місць (OpenStreetMap/Nominatim)'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/></svg>', text:'Побудова реального маршруту по дорогах (OSRM) та вибір найкращого варіанту'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>', text:'Керування навігацією голосом під час поїздки'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3"/></svg>', text:'Керування режимом тіней і маршрутом по тіні'},
+  ];
+  function buildCapList(id, items){
+    const el = $(id); el.innerHTML='';
+    items.forEach(c => { const row=document.createElement('div'); row.className='capability';
+      row.innerHTML = `<div class="capability-dot">${c.icon}</div><div class="capability-text">${c.text}</div>`; el.appendChild(row); });
+  }
+  buildCapList('aiCapList', AI_CAPS);
+  const SHADOW_CAPS = [
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3"/></svg>', text:'Реальне положення Сонця за вашими координатами'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>', text:'Тіні від реальних будівель OpenStreetMap у реальному часі'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/></svg>', text:'Маршрут по тіні з відсотком затінення'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', text:'Прогноз зміщення тіні на годину вперед'},
+  ];
+  buildCapList('shadowCapList', SHADOW_CAPS);
+
+  /* ---------------- INIT ---------------- */
+  function init(){
+    applyTheme();
+    setTimeout(()=>{ $('splash').classList.add('hide'); }, 1100);
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (gp) => {
+          S.userPos = [gp.coords.latitude, gp.coords.longitude];
+          S.hasRealLocation = true;
+          userMarker.setLatLng(S.userPos);
+          map.setView(S.userPos, CFG.DEFAULT_ZOOM, { animate:false });
+        },
+        () => { /* keep default center, no permission granted yet */ },
+        { timeout:6000 }
+      );
+    }
+    window.addEventListener('resize', ()=>{ map.invalidateSize(); positionSunDial(); });
+  }
+  init();
+})();
+</script>
+</body>
+</html>
