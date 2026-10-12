@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "8aa20201-e891-48e0-8ca7-3dec49989abe",
-   "name": "Puffer Jacket",
-   "description": "",
-   "category": "Outerwear & Jackets",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33.jpg",
-   "price": 3800,
-   "discount": 0,
-   "soldOut": true,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "4e2abb48-0563-4e5a-998e-77fbff473a20",
    "name": "Techwear Pants",
    "description": "",
