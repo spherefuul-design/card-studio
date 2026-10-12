@@ -13,18 +13,6 @@
  ],
  "products": [
   {
-   "id": "d0e06505-a9c2-499e-a61a-70bc0383ed3c",
-   "name": "Crossbody Bag",
-   "description": "",
-   "category": "Accessories",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28 (2).jpg",
-   "price": 1600,
-   "discount": 25,
-   "soldOut": false,
-   "sizes": {}
-  },
-  {
    "id": "8aa20201-e891-48e0-8ca7-3dec49989abe",
    "name": "Puffer Jacket",
    "description": "",
