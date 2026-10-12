@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "fe5dd2d2-26b0-4bf4-b03f-432360da1be4",
-   "name": "Oversized Zip Jacket",
-   "description": "",
-   "category": "Outerwear & Jackets",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33 (2).jpg",
-   "price": 3200,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "ae9712b1-7a90-4390-b83f-0322c341a9ea",
    "name": "Basic White Tee",
    "description": "",
