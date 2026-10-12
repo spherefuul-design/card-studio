@@ -626,7 +626,7 @@
         });
     });
 
-    fetch(SUPABASE_URL + '/rest/v1/store_data?id=eq.1&select=data', { headers: { apikey: SUPABASE_ANON_KEY }, cache: 'no-store' }).then(r => r.json()).then(rows => { DATA = rows[0].data; buildMenus(); renderGrid(); })
+    fetch(new URL(SUPABASE_URL.trim()).origin + '/rest/v1/store_data?id=eq.1&select=data', { headers: { apikey: SUPABASE_ANON_KEY.trim() }, cache: 'no-store' }).then(r => r.json()).then(rows => { DATA = rows[0].data; buildMenus(); renderGrid(); })
         .catch(() => { document.getElementById('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити товари</p>'; });
     </script>
 </body>

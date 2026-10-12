@@ -103,7 +103,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
 if (SUPABASE_URL.includes('ТВІЙ')) alert('Заповни config.js: встав Project URL і ключ');
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(new URL(SUPABASE_URL.trim()).origin, SUPABASE_ANON_KEY.trim());
 let D = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
 const final = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
 const sold = p => p.soldOut || (Object.keys(p.sizes || {}).length > 0 && !Object.values(p.sizes).some(Boolean));
