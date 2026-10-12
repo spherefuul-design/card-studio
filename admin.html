@@ -102,6 +102,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
+if (SUPABASE_URL.includes('ТВІЙ')) alert('Заповни config.js: встав Project URL і ключ');
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let D = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
 const final = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
@@ -142,7 +143,7 @@ async function logout() { await sb.auth.signOut(); location.reload(); }
 
 $('login-btn').onclick = async () => {
     const { error } = await sb.auth.signInWithPassword({ email: $('l-email').value.trim(), password: $('l-pass').value });
-    if (error) { $('login-err').textContent = 'Невірний email або пароль'; return $('login-err').classList.remove('hidden'); }
+    if (error) { $('login-err').textContent = 'Помилка входу: ' + error.message + (error.message.includes('Invalid login') ? ' (невірний email або пароль)' : ''); return $('login-err').classList.remove('hidden'); }
     try { await start(); } catch (e) { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }
 };
 $('l-pass').addEventListener('keydown', e => e.key === 'Enter' && $('login-btn').click());
