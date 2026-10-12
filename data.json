@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "ae9712b1-7a90-4390-b83f-0322c341a9ea",
-   "name": "Basic White Tee",
-   "description": "",
-   "category": "Tops & T-shirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28.jpg",
-   "price": 650,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "c302d94a-fbde-4292-9ed6-eb2f00ac984d",
    "name": "Vintage Washed Shorts",
    "description": "",
