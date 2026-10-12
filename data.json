@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "c302d94a-fbde-4292-9ed6-eb2f00ac984d",
-   "name": "Vintage Washed Shorts",
-   "description": "",
-   "category": "Pants & Denim",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28 (2).jpg",
-   "price": 1500,
-   "discount": 26.66666666666667,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "f7b43733-6f1e-4aea-95ba-2c9424a426aa",
    "name": "Heavyweight Sweatshirt",
    "description": "",
