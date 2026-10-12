@@ -13,18 +13,6 @@
  ],
  "products": [
   {
-   "id": "37586f1e-dba2-4a48-a467-39ff3d4d1235",
-   "name": "Leopard \"2016\" Backpack",
-   "description": "",
-   "price": 2200,
-   "discount": 0,
-   "category": "Accessories",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-34.jpg",
-   "sizes": {},
-   "soldOut": false
-  },
-  {
    "id": "d9ebc3eb-cb51-4011-947a-d505fd99db1d",
    "name": "\"Create Your Own Dreams\" Changing Colour Longsleeve",
    "description": "",
