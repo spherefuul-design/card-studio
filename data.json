@@ -25,23 +25,6 @@
    "soldOut": false
   },
   {
-   "id": "9dac3be7-601f-4e5c-a04c-82c23b968162",
-   "name": "\"Yessirskiii\" Flare Pants",
-   "description": "",
-   "category": "Pants & Denim",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33.jpg",
-   "price": 2400,
-   "discount": 41.666666666666664,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "d9ebc3eb-cb51-4011-947a-d505fd99db1d",
    "name": "\"Create Your Own Dreams\" Changing Colour Longsleeve",
    "description": "",
