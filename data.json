@@ -11,23 +11,5 @@
   "999yessirskiii",
   "НАЙК"
  ],
- "products": [
-  {
-   "id": "4e2abb48-0563-4e5a-998e-77fbff473a20",
-   "name": "Techwear Pants",
-   "description": "",
-   "category": "Pants & Denim",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28.jpg",
-   "price": 2900,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  }
- ]
+ "products": []
 }
