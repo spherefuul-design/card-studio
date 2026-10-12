@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Адмінка</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script src="config.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -21,13 +23,10 @@
 <div id="login" class="min-h-screen flex items-center justify-center p-6">
     <div class="bg-white p-8 w-full max-w-sm border">
         <h1 class="text-lg font-semibold mb-1">Адмінка</h1>
-        <p class="text-xs text-gray-500">Підключення до твого GitHub-репозиторію</p>
-        <label class="lbl">GitHub username</label><input id="g-owner" class="inp" placeholder="username">
-        <label class="lbl">Назва репозиторію</label><input id="g-repo" class="inp" placeholder="my-store">
-        <label class="lbl">Гілка</label><input id="g-branch" class="inp" value="main">
-        <label class="lbl">Токен (Contents: Read and write)</label><input id="g-token" type="password" class="inp" placeholder="github_pat_...">
+        <label class="lbl">Email</label><input id="l-email" type="email" class="inp" autocomplete="username">
+        <label class="lbl">Пароль</label><input id="l-pass" type="password" class="inp" autocomplete="current-password">
         <p id="login-err" class="text-red-600 text-xs mt-2 hidden"></p>
-        <button id="login-btn" class="btn w-full mt-4">Підключити</button>
+        <button id="login-btn" class="btn w-full mt-4">Увійти</button>
     </div>
 </div>
 
@@ -103,44 +102,35 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
-let CFG = JSON.parse(localStorage.getItem('gh') || '{}'), D = null, SHA = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let D = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
 const final = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
 const sold = p => p.soldOut || (Object.keys(p.sizes || {}).length > 0 && !Object.values(p.sizes).some(Boolean));
 function toast(t) { const e = $('toast'); e.textContent = t; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 2400); }
 
-const api = (path, opt = {}) => fetch('https://api.github.com/repos/' + CFG.owner + '/' + CFG.repo + '/contents/' + path, {
-    ...opt, headers: { Authorization: 'Bearer ' + CFG.token, Accept: 'application/vnd.github+json' }
-});
-const b64 = s => btoa(unescape(encodeURIComponent(s)));
-
 async function load() {
-    const r = await api('data.json?ref=' + CFG.branch);
-    if (r.status === 404) throw new Error('Не знайдено data.json у репозиторії (або невірні username/репо/гілка)');
-    if (r.status === 401 || r.status === 403) throw new Error('Токен не підходить або немає права Contents: Read and write');
-    if (!r.ok) throw new Error('GitHub помилка ' + r.status);
-    const j = await r.json();
-    SHA = j.sha;
-    D = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, '')))));
+    const { data, error } = await sb.from('store_data').select('data').eq('id', 1).single();
+    if (error) throw new Error('Не вдалося завантажити дані: ' + error.message);
+    D = data.data;
 }
 
-// зберігаємо по черзі, щоб не було конфліктів версій
+// зберігаємо по черзі
 function save() {
     chain = chain.then(async () => {
-        const r = await api('data.json', { method: 'PUT', body: JSON.stringify({ message: 'Update products', content: b64(JSON.stringify(D, null, 1)), sha: SHA, branch: CFG.branch }) });
-        if (!r.ok) { toast(r.status === 401 || r.status === 403 ? 'Немає доступу — перевір токен' : 'Помилка збереження ' + r.status); return false; }
-        SHA = (await r.json()).content.sha;
-        toast('Збережено ✓ На сайті з\'явиться за ~1 хв');
+        const { data, error } = await sb.from('store_data').update({ data: D, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
+        if (error || !data || !data.length) { toast('Не збереглось: перевір, що email у SQL збігається з email входу'); return false; }
+        toast('Збережено ✓ Вже на сайті');
         return true;
     }).catch(() => { toast('Помилка мережі'); return false; });
     return chain;
 }
 
 async function uploadImage(dataUrl) {
-    const path = 'images/' + Date.now() + '.jpg';
-    const r = await api(path, { method: 'PUT', body: JSON.stringify({ message: 'Add image', content: dataUrl.split(',')[1], branch: CFG.branch }) });
-    if (!r.ok) throw new Error('Не вдалося завантажити фото (' + r.status + ')');
-    imgCache[path] = dataUrl;
-    return path;
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = Date.now() + '.jpg';
+    const { error } = await sb.storage.from('images').upload(path, blob, { contentType: 'image/jpeg' });
+    if (error) throw new Error('Не вдалося завантажити фото: ' + error.message);
+    return sb.storage.from('images').getPublicUrl(path).data.publicUrl;
 }
 
 async function start() {
@@ -148,14 +138,14 @@ async function start() {
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
     render();
 }
-function logout() { localStorage.removeItem('gh'); location.reload(); }
+async function logout() { await sb.auth.signOut(); location.reload(); }
 
-$('g-owner').value = CFG.owner || ''; $('g-repo').value = CFG.repo || ''; $('g-branch').value = CFG.branch || 'main';
 $('login-btn').onclick = async () => {
-    CFG = { owner: $('g-owner').value.trim(), repo: $('g-repo').value.trim(), branch: $('g-branch').value.trim() || 'main', token: $('g-token').value.trim() };
-    try { await start(); localStorage.setItem('gh', JSON.stringify(CFG)); $('login-err').classList.add('hidden'); }
-    catch (e) { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }
+    const { error } = await sb.auth.signInWithPassword({ email: $('l-email').value.trim(), password: $('l-pass').value });
+    if (error) { $('login-err').textContent = 'Невірний email або пароль'; return $('login-err').classList.remove('hidden'); }
+    try { await start(); } catch (e) { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }
 };
+$('l-pass').addEventListener('keydown', e => e.key === 'Enter' && $('login-btn').click());
 $('logout').onclick = logout;
 
 function chips(box, arr, key) {
@@ -266,7 +256,7 @@ $('save-btn').onclick = async () => {
     if (await save()) { $('modal').classList.add('hidden'); render(); }
 };
 
-if (CFG.token) start().catch(e => { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); });
+sb.auth.getSession().then(({ data }) => { if (data.session) start().catch(e => { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }); });
 </script>
 </body>
 </html>

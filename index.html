@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimalist Mobile Header</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -625,8 +626,8 @@
         });
     });
 
-    fetch('data.json?t=' + Date.now()).then(r => r.json()).then(d => { DATA = d; buildMenus(); renderGrid(); })
-        .catch(() => { document.getElementById('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити data.json</p>'; });
+    fetch(SUPABASE_URL + '/rest/v1/store_data?id=eq.1&select=data', { headers: { apikey: SUPABASE_ANON_KEY }, cache: 'no-store' }).then(r => r.json()).then(rows => { DATA = rows[0].data; buildMenus(); renderGrid(); })
+        .catch(() => { document.getElementById('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити товари</p>'; });
     </script>
 </body>
 </html>
