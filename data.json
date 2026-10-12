@@ -19,7 +19,7 @@
    "image": "photo_2026-10-11_22-12-34.jpg",
    "price": 2200,
    "discount": 27.27272727272727,
-   "soldOut": true,
+   "soldOut": false,
    "sizes": {}
   },
   {
