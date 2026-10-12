@@ -13,18 +13,6 @@
  ],
  "products": [
   {
-   "id": "ba1c40bb-fc4d-42a9-8652-a31942a8d95a",
-   "name": "Beanie Hat",
-   "description": "",
-   "category": "Accessories",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28.jpg",
-   "price": 500,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {}
-  },
-  {
    "id": "d0e06505-a9c2-499e-a61a-70bc0383ed3c",
    "name": "Crossbody Bag",
    "description": "",
