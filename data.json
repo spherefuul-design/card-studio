@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "d9ebc3eb-cb51-4011-947a-d505fd99db1d",
-   "name": "\"Create Your Own Dreams\" Changing Colour Longsleeve",
-   "description": "",
-   "category": "Tops & T-shirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33 (2).jpg",
-   "price": 1800,
-   "discount": 44.44444444444444,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "4a7dc1e4-4606-4946-9952-b385112266f3",
    "name": "\"Yessirski\" Black Hoodie",
    "description": "",
