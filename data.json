@@ -13,6 +13,24 @@
  ],
  "products": [
   {
+   "id": "2d71b6c8-f7ae-420a-bd95-825f08265a5e",
+   "name": "Рюкзак Chrome Hearts",
+   "description": "Кайфовий рюкзак",
+   "price": 1299,
+   "discount": 5,
+   "category": "КЕПКА",
+   "brand": "НАЙК",
+   "image": "images/1791791037827.jpg",
+   "sizes": {
+    "S": true,
+    "M": true,
+    "L": true,
+    "XL": false,
+    "XXL": false
+   },
+   "soldOut": false
+  },
+  {
    "id": "37586f1e-dba2-4a48-a467-39ff3d4d1235",
    "name": "Leopard \"2016\" Backpack",
    "description": "",
