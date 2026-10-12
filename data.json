@@ -71,23 +71,6 @@
    }
   },
   {
-   "id": "681b1a6b-3ccb-401c-8719-fa4de4fac788",
-   "name": "Striped Longsleeve",
-   "description": "",
-   "category": "Tops & T-shirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33 (2).jpg",
-   "price": 1300,
-   "discount": 26.923076923076927,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "4e2abb48-0563-4e5a-998e-77fbff473a20",
    "name": "Techwear Pants",
    "description": "",
