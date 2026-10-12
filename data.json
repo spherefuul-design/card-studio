@@ -103,18 +103,6 @@
     "L": true,
     "XL": true
    }
-  },
-  {
-   "id": "8a621dd3-0e28-48f8-b4b0-8ee353c7ca37",
-   "name": "Silver Ring",
-   "description": "",
-   "category": "Accessories",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28 (2).jpg",
-   "price": 450,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {}
   }
  ]
 }
