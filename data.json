@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "343aeb92-9dbc-42a1-b349-6c881b946851",
-   "name": "Leather Bomber",
-   "description": "",
-   "category": "Outerwear & Jackets",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33 (2).jpg",
-   "price": 4500,
-   "discount": 0,
-   "soldOut": true,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "ba1c40bb-fc4d-42a9-8652-a31942a8d95a",
    "name": "Beanie Hat",
    "description": "",
