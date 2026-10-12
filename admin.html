@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмінка</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .inp { width: 100%; border: 1px solid #e5e5e5; padding: 10px 12px; font-size: 14px; background: #fff; }
+        .inp:focus { outline: none; border-color: #000; }
+        .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #777; display: block; margin: 14px 0 5px; }
+        .btn { background: #000; color: #fff; padding: 10px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+        .btn-o { border: 1px solid #000; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: #fff; }
+    </style>
+</head>
+<body class="bg-gray-50 text-black min-h-screen">
+
+<!-- ВХІД -->
+<div id="login" class="min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white p-8 w-full max-w-sm border">
+        <h1 class="text-lg font-semibold mb-1">Адмінка</h1>
+        <p class="text-xs text-gray-500">Підключення до твого GitHub-репозиторію</p>
+        <label class="lbl">GitHub username</label><input id="g-owner" class="inp" placeholder="username">
+        <label class="lbl">Назва репозиторію</label><input id="g-repo" class="inp" placeholder="my-store">
+        <label class="lbl">Гілка</label><input id="g-branch" class="inp" value="main">
+        <label class="lbl">Токен (Contents: Read and write)</label><input id="g-token" type="password" class="inp" placeholder="github_pat_...">
+        <p id="login-err" class="text-red-600 text-xs mt-2 hidden"></p>
+        <button id="login-btn" class="btn w-full mt-4">Підключити</button>
+    </div>
+</div>
+
+<!-- ПАНЕЛЬ -->
+<div id="app" class="hidden max-w-3xl mx-auto p-4 pb-24">
+    <div class="flex items-center justify-between py-4">
+        <h1 class="text-lg font-semibold">Товари (<span id="count">0</span>)</h1>
+        <div class="space-x-2">
+            <button id="add-btn" class="btn">+ Додати товар</button>
+            <button id="logout" class="btn-o">Вийти</button>
+        </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white border p-4">
+            <p class="lbl !mt-0">Категорії</p>
+            <div id="cats" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex gap-2"><input id="new-cat" class="inp" placeholder="Нова категорія"><button id="add-cat" class="btn-o">+</button></div>
+        </div>
+        <div class="bg-white border p-4">
+            <p class="lbl !mt-0">Бренди</p>
+            <div id="brands" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex gap-2"><input id="new-brand" class="inp" placeholder="Новий бренд"><button id="add-brand" class="btn-o">+</button></div>
+        </div>
+    </div>
+
+    <div id="list" class="space-y-2"></div>
+</div>
+
+<!-- ФОРМА ТОВАРУ -->
+<div id="modal" class="fixed inset-0 bg-black/50 z-50 hidden overflow-y-auto p-4">
+    <div class="bg-white max-w-lg mx-auto p-6 my-4">
+        <div class="flex justify-between items-center mb-2">
+            <h2 id="form-title" class="font-semibold">Новий товар</h2>
+            <button id="close-form" class="text-2xl leading-none">&times;</button>
+        </div>
+
+        <label class="lbl">Фото</label>
+        <img id="f-preview" class="w-32 h-40 object-cover bg-gray-100 mb-2 hidden">
+        <input id="f-file" type="file" accept="image/*" class="text-sm">
+
+        <label class="lbl">Назва</label>
+        <input id="f-name" class="inp">
+
+        <label class="lbl">Опис</label>
+        <textarea id="f-desc" rows="5" class="inp" placeholder="Матеріал, догляд, посадка..."></textarea>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div><label class="lbl">Ціна (₴)</label><input id="f-price" type="number" min="0" class="inp"></div>
+            <div><label class="lbl">Знижка Sale (%)</label><input id="f-discount" type="number" min="0" max="99" step="0.01" placeholder="0" class="inp"></div>
+        </div>
+        <p id="f-final" class="text-xs text-gray-500 mt-1"></p>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div><label class="lbl">Категорія</label><select id="f-cat" class="inp"></select></div>
+            <div><label class="lbl">Бренд</label><select id="f-brand" class="inp"></select></div>
+        </div>
+
+        <label class="lbl">Розміри</label>
+        <div id="f-sizes" class="grid grid-cols-5 gap-2"></div>
+        <p class="text-[11px] text-gray-400 mt-1">«—» розмір не продається · «Є» в наявності · «Нема» на сайті закреслений. Для аксесуарів без розмірів залиш усе «—».</p>
+
+        <label class="flex items-center gap-2 mt-4 text-sm"><input id="f-sold" type="checkbox" class="w-4 h-4"> Sold out (весь товар)</label>
+
+        <button id="save-btn" class="btn w-full mt-6">Зберегти</button>
+    </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 hidden z-[60]"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
+let CFG = JSON.parse(localStorage.getItem('gh') || '{}'), D = null, SHA = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
+const final = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
+const sold = p => p.soldOut || (Object.keys(p.sizes || {}).length > 0 && !Object.values(p.sizes).some(Boolean));
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 2400); }
+
+const api = (path, opt = {}) => fetch('https://api.github.com/repos/' + CFG.owner + '/' + CFG.repo + '/contents/' + path, {
+    ...opt, headers: { Authorization: 'Bearer ' + CFG.token, Accept: 'application/vnd.github+json' }
+});
+const b64 = s => btoa(unescape(encodeURIComponent(s)));
+
+async function load() {
+    const r = await api('data.json?ref=' + CFG.branch);
+    if (r.status === 404) throw new Error('Не знайдено data.json у репозиторії (або невірні username/репо/гілка)');
+    if (r.status === 401 || r.status === 403) throw new Error('Токен не підходить або немає права Contents: Read and write');
+    if (!r.ok) throw new Error('GitHub помилка ' + r.status);
+    const j = await r.json();
+    SHA = j.sha;
+    D = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, '')))));
+}
+
+// зберігаємо по черзі, щоб не було конфліктів версій
+function save() {
+    chain = chain.then(async () => {
+        const r = await api('data.json', { method: 'PUT', body: JSON.stringify({ message: 'Update products', content: b64(JSON.stringify(D, null, 1)), sha: SHA, branch: CFG.branch }) });
+        if (!r.ok) { toast(r.status === 401 || r.status === 403 ? 'Немає доступу — перевір токен' : 'Помилка збереження ' + r.status); return false; }
+        SHA = (await r.json()).content.sha;
+        toast('Збережено ✓ На сайті з\'явиться за ~1 хв');
+        return true;
+    }).catch(() => { toast('Помилка мережі'); return false; });
+    return chain;
+}
+
+async function uploadImage(dataUrl) {
+    const path = 'images/' + Date.now() + '.jpg';
+    const r = await api(path, { method: 'PUT', body: JSON.stringify({ message: 'Add image', content: dataUrl.split(',')[1], branch: CFG.branch }) });
+    if (!r.ok) throw new Error('Не вдалося завантажити фото (' + r.status + ')');
+    imgCache[path] = dataUrl;
+    return path;
+}
+
+async function start() {
+    await load();
+    $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+    render();
+}
+function logout() { localStorage.removeItem('gh'); location.reload(); }
+
+$('g-owner').value = CFG.owner || ''; $('g-repo').value = CFG.repo || ''; $('g-branch').value = CFG.branch || 'main';
+$('login-btn').onclick = async () => {
+    CFG = { owner: $('g-owner').value.trim(), repo: $('g-repo').value.trim(), branch: $('g-branch').value.trim() || 'main', token: $('g-token').value.trim() };
+    try { await start(); localStorage.setItem('gh', JSON.stringify(CFG)); $('login-err').classList.add('hidden'); }
+    catch (e) { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }
+};
+$('logout').onclick = logout;
+
+function chips(box, arr, key) {
+    $(box).innerHTML = arr.map((v, i) => '<span class="bg-gray-100 px-3 py-1 text-xs">' + esc(v) + ' <button data-k="' + key + '" data-i="' + i + '" class="ml-1 text-gray-400 hover:text-red-600">×</button></span>').join('');
+}
+
+function render() {
+    $('count').textContent = D.products.length;
+    chips('cats', D.categories, 'categories'); chips('brands', D.brands, 'brands');
+    $('list').innerHTML = D.products.map(p => {
+        const s = sold(p);
+        return '<div class="bg-white border p-3 flex gap-3 items-center">' +
+            '<img src="' + esc(imgCache[p.image] || p.image) + '" class="w-14 h-[68px] object-cover bg-gray-100">' +
+            '<div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">' + esc(p.name) + '</p>' +
+            '<p class="text-xs text-gray-500">' + esc(p.category) + ' · ' + esc(p.brand) + '</p>' +
+            '<p class="text-xs mt-1">' + (p.discount > 0 ? '<b>' + fmt(final(p)) + '</b> <s class="text-gray-400">' + fmt(p.price) + '</s> <span class="text-red-600">-' + Math.round(p.discount) + '%</span>' : '<b>' + fmt(p.price) + '</b>') +
+            (s ? ' <span class="bg-black text-white px-1.5 py-0.5 text-[10px] uppercase">Sold out</span>' : '') + '</p></div>' +
+            '<div class="flex flex-col gap-1">' +
+            '<button data-a="edit" data-id="' + p.id + '" class="btn-o">Змінити</button>' +
+            '<button data-a="sold" data-id="' + p.id + '" class="btn-o">' + (p.soldOut ? 'В наявності' : 'Sold out') + '</button>' +
+            '<button data-a="del" data-id="' + p.id + '" class="btn-o text-red-600 !border-red-300">Видалити</button></div></div>';
+    }).join('') || '<p class="text-sm text-gray-400">Товарів ще немає</p>';
+}
+
+document.addEventListener('click', async e => {
+    const c = e.target.closest('[data-k]');
+    if (c) {
+        const arr = D[c.dataset.k], v = arr[c.dataset.i];
+        const used = D.products.some(p => p[c.dataset.k === 'brands' ? 'brand' : 'category'] === v);
+        if (used) return toast('Спочатку зміни товари з «' + v + '»');
+        arr.splice(c.dataset.i, 1); render(); save(); return;
+    }
+    const b = e.target.closest('[data-a]');
+    if (!b) return;
+    const p = D.products.find(x => x.id === b.dataset.id);
+    if (b.dataset.a === 'edit') openForm(p);
+    if (b.dataset.a === 'sold') { p.soldOut = !p.soldOut; render(); save(); }
+    if (b.dataset.a === 'del' && confirm('Видалити «' + p.name + '»?')) { D.products = D.products.filter(x => x !== p); render(); save(); }
+});
+
+function addTo(inputId, key) {
+    const v = $(inputId).value.trim();
+    if (!v || D[key].includes(v)) return;
+    D[key].push(v); $(inputId).value = ''; render(); save();
+}
+$('add-cat').onclick = () => addTo('new-cat', 'categories');
+$('add-brand').onclick = () => addTo('new-brand', 'brands');
+
+// ---- форма ----
+function openForm(p) {
+    editId = p ? p.id : null; img = p ? p.image : '';
+    $('form-title').textContent = p ? 'Редагувати товар' : 'Новий товар';
+    $('f-name').value = p?.name || ''; $('f-desc').value = p?.description || '';
+    $('f-price').value = p?.price ?? ''; $('f-discount').value = p?.discount ? +(+p.discount).toFixed(2) : '';
+    $('f-sold').checked = !!p?.soldOut; $('f-file').value = '';
+    $('f-cat').innerHTML = D.categories.map(c => '<option>' + esc(c) + '</option>').join('');
+    $('f-brand').innerHTML = D.brands.map(c => '<option>' + esc(c) + '</option>').join('');
+    if (p) { $('f-cat').value = p.category; $('f-brand').value = p.brand; }
+    $('f-sizes').innerHTML = SIZES.map(s => {
+        const v = p && s in (p.sizes || {}) ? (p.sizes[s] ? 'in' : 'out') : (p ? '' : 'in');
+        return '<div><p class="text-xs text-center mb-1">' + s + '</p><select data-s="' + s + '" class="inp !px-1 text-xs">' +
+            ['', 'in', 'out'].map(o => '<option value="' + o + '"' + (o === v ? ' selected' : '') + '>' + { '': '—', in: 'Є', out: 'Нема' }[o] + '</option>').join('') + '</select></div>';
+    }).join('');
+    preview(); $('modal').classList.remove('hidden');
+}
+function preview() {
+    const e = $('f-preview'); e.src = imgCache[img] || img; e.classList.toggle('hidden', !img);
+    const pr = +$('f-price').value, d = +$('f-discount').value || 0;
+    $('f-final').textContent = pr && d > 0 ? 'Ціна на сайті: ' + fmt(Math.round(pr * (1 - d / 100))) + ' (було ' + fmt(pr) + ')' : '';
+}
+$('f-price').oninput = $('f-discount').oninput = preview;
+$('add-btn').onclick = () => openForm(null);
+$('close-form').onclick = () => $('modal').classList.add('hidden');
+
+$('f-file').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+        const im = new Image();
+        im.onload = () => { // стискаємо до 1000px, щоб сайт не гальмував
+            const k = Math.min(1, 1000 / Math.max(im.width, im.height)), cv = document.createElement('canvas');
+            cv.width = im.width * k; cv.height = im.height * k;
+            const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+            img = cv.toDataURL('image/jpeg', 0.85); preview();
+        };
+        im.src = r.result;
+    };
+    r.readAsDataURL(f);
+};
+
+$('save-btn').onclick = async () => {
+    const name = $('f-name').value.trim(), price = +$('f-price').value;
+    if (!name || !price) return toast('Вкажи назву і ціну');
+    if (!img) return toast('Додай фото');
+    const sizes = {};
+    document.querySelectorAll('#f-sizes select').forEach(s => { if (s.value) sizes[s.dataset.s] = s.value === 'in'; });
+    let image = img;
+    if (img.startsWith('data:')) {
+        toast('Завантажую фото…');
+        try { image = await uploadImage(img); } catch (e) { return toast(e.message); }
+    }
+    const p = {
+        id: editId || crypto.randomUUID(), name, description: $('f-desc').value.trim(), price,
+        discount: Math.min(99, Math.max(0, +$('f-discount').value || 0)), category: $('f-cat').value, brand: $('f-brand').value,
+        image, sizes, soldOut: $('f-sold').checked
+    };
+    if (editId) D.products[D.products.findIndex(x => x.id === editId)] = p; else D.products.unshift(p);
+    if (await save()) { $('modal').classList.add('hidden'); render(); }
+};
+
+if (CFG.token) start().catch(e => { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+{
+  "categories": [
+    "Tops & T-shirts",
+    "Hoodies & Sweatshirts",
+    "Outerwear & Jackets",
+    "Pants & Denim",
+    "Accessories"
+  ],
+  "brands": [
+    "999yessirskiii"
+  ],
+  "products": [
+    {
+      "id": "37586f1e-dba2-4a48-a467-39ff3d4d1235",
+      "name": "Leopard \"2016\" Backpack",
+      "description": "",
+      "category": "Accessories",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-34.jpg",
+      "price": 2200,
+      "discount": 27.27272727272727,
+      "soldOut": false,
+      "sizes": {}
+    },
+    {
+      "id": "9dac3be7-601f-4e5c-a04c-82c23b968162",
+      "name": "\"Yessirskiii\" Flare Pants",
+      "description": "",
+      "category": "Pants & Denim",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33.jpg",
+      "price": 2400,
+      "discount": 41.666666666666664,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "d9ebc3eb-cb51-4011-947a-d505fd99db1d",
+      "name": "\"Create Your Own Dreams\" Changing Colour Longsleeve",
+      "description": "",
+      "category": "Tops & T-shirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33 (2).jpg",
+      "price": 1800,
+      "discount": 44.44444444444444,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "4a7dc1e4-4606-4946-9952-b385112266f3",
+      "name": "\"Yessirski\" Black Hoodie",
+      "description": "",
+      "category": "Hoodies & Sweatshirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28.jpg",
+      "price": 2400,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "a5db3617-7e68-4cc3-a902-41df77c683aa",
+      "name": "\"Yessirski\" Red Hoodie",
+      "description": "",
+      "category": "Hoodies & Sweatshirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28 (2).jpg",
+      "price": 2400,
+      "discount": 0,
+      "soldOut": true,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "9fd1a1fa-f03b-492c-8221-bfd94d91e541",
+      "name": "\"Yessirski\" Grey Hoodie",
+      "description": "",
+      "category": "Hoodies & Sweatshirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-34.jpg",
+      "price": 2400,
+      "discount": 0,
+      "soldOut": true,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "0488b4f0-b18a-470d-89f7-9f6ba28f4108",
+      "name": "Graphic Vintage T-Shirt",
+      "description": "",
+      "category": "Tops & T-shirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33.jpg",
+      "price": 1200,
+      "discount": 29.166666666666664,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "fe5dd2d2-26b0-4bf4-b03f-432360da1be4",
+      "name": "Oversized Zip Jacket",
+      "description": "",
+      "category": "Outerwear & Jackets",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33 (2).jpg",
+      "price": 3200,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "ae9712b1-7a90-4390-b83f-0322c341a9ea",
+      "name": "Basic White Tee",
+      "description": "",
+      "category": "Tops & T-shirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28.jpg",
+      "price": 650,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "c302d94a-fbde-4292-9ed6-eb2f00ac984d",
+      "name": "Vintage Washed Shorts",
+      "description": "",
+      "category": "Pants & Denim",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28 (2).jpg",
+      "price": 1500,
+      "discount": 26.66666666666667,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "f7b43733-6f1e-4aea-95ba-2c9424a426aa",
+      "name": "Heavyweight Sweatshirt",
+      "description": "",
+      "category": "Hoodies & Sweatshirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-34.jpg",
+      "price": 1900,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "21161361-6f3b-43f5-9a02-844f3a58dd1e",
+      "name": "Cargo Pants Black",
+      "description": "",
+      "category": "Pants & Denim",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33.jpg",
+      "price": 2600,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "343aeb92-9dbc-42a1-b349-6c881b946851",
+      "name": "Leather Bomber",
+      "description": "",
+      "category": "Outerwear & Jackets",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33 (2).jpg",
+      "price": 4500,
+      "discount": 0,
+      "soldOut": true,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "ba1c40bb-fc4d-42a9-8652-a31942a8d95a",
+      "name": "Beanie Hat",
+      "description": "",
+      "category": "Accessories",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28.jpg",
+      "price": 500,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {}
+    },
+    {
+      "id": "d0e06505-a9c2-499e-a61a-70bc0383ed3c",
+      "name": "Crossbody Bag",
+      "description": "",
+      "category": "Accessories",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28 (2).jpg",
+      "price": 1600,
+      "discount": 25,
+      "soldOut": false,
+      "sizes": {}
+    },
+    {
+      "id": "4c3d003a-8be9-4bee-bd83-1175ccbcc168",
+      "name": "Denim Vest",
+      "description": "",
+      "category": "Outerwear & Jackets",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-34.jpg",
+      "price": 2100,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "8aa20201-e891-48e0-8ca7-3dec49989abe",
+      "name": "Puffer Jacket",
+      "description": "",
+      "category": "Outerwear & Jackets",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33.jpg",
+      "price": 3800,
+      "discount": 0,
+      "soldOut": true,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "681b1a6b-3ccb-401c-8719-fa4de4fac788",
+      "name": "Striped Longsleeve",
+      "description": "",
+      "category": "Tops & T-shirts",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-12-33 (2).jpg",
+      "price": 1300,
+      "discount": 26.923076923076927,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "4e2abb48-0563-4e5a-998e-77fbff473a20",
+      "name": "Techwear Pants",
+      "description": "",
+      "category": "Pants & Denim",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28.jpg",
+      "price": 2900,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {
+        "S": true,
+        "M": true,
+        "L": true,
+        "XL": true
+      }
+    },
+    {
+      "id": "8a621dd3-0e28-48f8-b4b0-8ee353c7ca37",
+      "name": "Silver Ring",
+      "description": "",
+      "category": "Accessories",
+      "brand": "999yessirskiii",
+      "image": "photo_2026-10-11_22-11-28 (2).jpg",
+      "price": 450,
+      "discount": 0,
+      "soldOut": false,
+      "sizes": {}
+    }
+  ]
+}
