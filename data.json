@@ -37,23 +37,6 @@
    "sizes": {}
   },
   {
-   "id": "4c3d003a-8be9-4bee-bd83-1175ccbcc168",
-   "name": "Denim Vest",
-   "description": "",
-   "category": "Outerwear & Jackets",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-34.jpg",
-   "price": 2100,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "8aa20201-e891-48e0-8ca7-3dec49989abe",
    "name": "Puffer Jacket",
    "description": "",
