@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "21161361-6f3b-43f5-9a02-844f3a58dd1e",
-   "name": "Cargo Pants Black",
-   "description": "",
-   "category": "Pants & Denim",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-33.jpg",
-   "price": 2600,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "343aeb92-9dbc-42a1-b349-6c881b946851",
    "name": "Leather Bomber",
    "description": "",
