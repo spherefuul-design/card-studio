@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "f7b43733-6f1e-4aea-95ba-2c9424a426aa",
-   "name": "Heavyweight Sweatshirt",
-   "description": "",
-   "category": "Hoodies & Sweatshirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-34.jpg",
-   "price": 1900,
-   "discount": 0,
-   "soldOut": false,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "21161361-6f3b-43f5-9a02-844f3a58dd1e",
    "name": "Cargo Pants Black",
    "description": "",
