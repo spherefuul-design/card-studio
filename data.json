@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "9fd1a1fa-f03b-492c-8221-bfd94d91e541",
-   "name": "\"Yessirski\" Grey Hoodie",
-   "description": "",
-   "category": "Hoodies & Sweatshirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-12-34.jpg",
-   "price": 2400,
-   "discount": 0,
-   "soldOut": true,
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   }
-  },
-  {
    "id": "0488b4f0-b18a-470d-89f7-9f6ba28f4108",
    "name": "Graphic Vintage T-Shirt",
    "description": "",
