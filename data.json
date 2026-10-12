@@ -13,23 +13,6 @@
  ],
  "products": [
   {
-   "id": "4a7dc1e4-4606-4946-9952-b385112266f3",
-   "name": "\"Yessirski\" Black Hoodie",
-   "description": "",
-   "price": 2400,
-   "discount": 90,
-   "category": "Hoodies & Sweatshirts",
-   "brand": "999yessirskiii",
-   "image": "photo_2026-10-11_22-11-28.jpg",
-   "sizes": {
-    "S": true,
-    "M": true,
-    "L": true,
-    "XL": true
-   },
-   "soldOut": false
-  },
-  {
    "id": "a5db3617-7e68-4cc3-a902-41df77c683aa",
    "name": "\"Yessirski\" Red Hoodie",
    "description": "",
