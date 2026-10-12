@@ -14,13 +14,13 @@
    "id": "37586f1e-dba2-4a48-a467-39ff3d4d1235",
    "name": "Leopard \"2016\" Backpack",
    "description": "",
+   "price": 2200,
+   "discount": 0,
    "category": "Accessories",
    "brand": "999yessirskiii",
    "image": "photo_2026-10-11_22-12-34.jpg",
-   "price": 2200,
-   "discount": 27.27272727272727,
-   "soldOut": false,
-   "sizes": {}
+   "sizes": {},
+   "soldOut": false
   },
   {
    "id": "9dac3be7-601f-4e5c-a04c-82c23b968162",
