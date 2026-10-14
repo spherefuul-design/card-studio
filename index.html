@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Магазин</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Esint shop — streetwear з доставкою по Україні">
+    <meta property="og:title" content="Esint shop">
+    <meta property="og:description" content="Streetwear з доставкою по Україні «Новою поштою»">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='38' font-weight='700' fill='%23fff' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Unbounded:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -57,312 +64,260 @@
     .pp-scroll { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .pp-scroll::-webkit-scrollbar { display: none; }
     .pp-scroll > div { flex: 0 0 62%; scroll-snap-align: start; cursor: pointer; }
+
+        /* ===== Редизайн ===== */
+        html { scroll-behavior: smooth; }
+        body { -webkit-font-smoothing: antialiased; }
+        .display { font-family: 'Unbounded', 'Inter', sans-serif; font-weight: 500; letter-spacing: .01em; }
+        .product-img { filter: contrast(1.06) brightness(1.02); }
+        .mq { display: flex; width: max-content; animation: mq 34s linear infinite; }
+        .mq span { white-space: nowrap; padding-right: 2.5rem; }
+        @keyframes mq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+        .rv.in { opacity: 1; transform: none; }
+        .skel { background: linear-gradient(90deg, #f1f1f1, #fafafa, #f1f1f1); background-size: 200% 100%; animation: sk 1.3s infinite; }
+        @keyframes sk { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { scrollbar-width: none; }
+        .chip-f { flex: none; border: 1px solid #e3e3e3; padding: 9px 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; background: #fff; transition: all .2s; }
+        .chip-f:hover { border-color: #000; }
+        .chip-f.on { background: #000; color: #fff; border-color: #000; }
+        #hd-video { display: none; }
+        .list-mode #hd-video { display: block; }
+        .list-mode #hd-logo, .list-mode #hero, .list-mode #feat { display: none; }
+        @media (min-width: 768px) { .pp-scroll > div { flex-basis: 23%; } }
+        .eyebrow { font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: #9a9a9a; margin-bottom: 6px; }
+        .menu-link { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; transition: padding .25s ease, color .2s; }
+        .menu-link .menu-arr { opacity: 0; transform: translateX(-6px); transition: all .25s ease; }
+        .menu-link:hover { padding-left: 8px; }
+        .menu-link:hover .menu-arr { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) { .mq { animation: none; } .rv { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased bg-white text-black">
 
-    <!-- HEADER START (Не закріплений) -->
-    <header class="w-full bg-white">
-        <div class="max-w-md mx-auto px-5 h-16 flex items-center justify-between">
-            
-            <!-- LEFT SIDE: 2-line Hamburger & Search Icon -->
-            <div class="flex items-center space-x-6">
-                <!-- Hamburger Button -->
-                <button id="menu-btn" aria-label="Open Menu" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                        <line x1="4" y1="9" x2="20" y2="9"></line>
-                        <line x1="4" y1="15" x2="20" y2="15"></line>
-                    </svg>
-                </button>
+    <!-- СТРІЧКА -->
+    <div id="mq-wrap" class="bg-black text-white text-[10px] tracking-[.28em] uppercase py-2.5 overflow-hidden"><div id="mq" class="mq"><span>Нова колекція — Доставка «Новою поштою» — Повернення 14 днів</span><span>Нова колекція — Доставка «Новою поштою» — Повернення 14 днів</span></div></div>
 
-                <!-- Search Button -->
-                <button id="search-btn" aria-label="Search" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+    <!-- ШАПКА -->
+    <header id="hd" class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 h-16 grid grid-cols-3 items-center">
+            <div class="flex items-center space-x-6">
+                <button id="menu-btn" aria-label="Меню" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line></svg>
+                </button>
+                <button id="search-btn" aria-label="Пошук" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
             </div>
-
-            <!-- RIGHT SIDE: Shopping Bag Icon -->
-            <div class="flex items-center">
-                <button id="cart-btn" aria-label="Cart" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity relative">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                    </svg>
-                    <!-- Cart badge counter -->
+            <div class="flex justify-center">
+                <a id="hd-logo" href="#" class="display text-sm md:text-base uppercase tracking-[.22em]">Esint shop</a>
+                <video id="hd-video" class="h-12 w-auto object-cover bg-white cursor-pointer" autoplay muted loop playsinline preload="metadata"><source src="video_2026-10-11_21-12-06.mp4" type="video/mp4"></video>
+            </div>
+            <div class="flex justify-end">
+                <button id="cart-btn" aria-label="Кошик" class="p-1 text-black focus:outline-none hover:opacity-60 transition-opacity relative">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-semibold" style="display:none">0</span>
                 </button>
             </div>
         </div>
     </header>
-    <!-- HEADER END -->
 
-    <!-- VIDEO START -->
-    <div class="max-w-md mx-auto w-full px-8 pt-3 flex justify-center pure-white-bg">
-        <video class="w-full max-w-[280px] object-cover aspect-[4/3] pure-white-bg" autoplay muted loop playsinline>
+    <!-- HERO (відео на весь екран) -->
+    <section id="hero" class="relative w-full h-[74vh] min-h-[440px] md:h-[88vh] bg-black overflow-hidden">
+        <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="auto">
             <source src="video_2026-10-11_21-12-06.mp4" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
-    </div>
-    <!-- VIDEO END -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/25"></div>
+        <div class="absolute bottom-0 inset-x-0 px-6 md:px-8 pb-10 md:pb-16">
+            <div class="max-w-6xl mx-auto text-white">
+                <p class="text-[10px] md:text-[11px] tracking-[.35em] uppercase opacity-80 mb-4">Нова колекція</p>
+                <h1 id="hero-title" class="display text-4xl md:text-7xl leading-[1.05] uppercase">Esint shop</h1>
+                <a href="#catalog" class="inline-block mt-7 border border-white px-8 py-3.5 text-[11px] tracking-[.2em] uppercase hover:bg-white hover:text-black transition-colors">Дивитись колекцію</a>
+            </div>
+        </div>
+    </section>
 
-    <!-- PRODUCTS GRID START -->
-    <main class="flex-1 max-w-md mx-auto w-full px-8 py-6 pure-white-bg">
-        <div id="list-head" class="hidden text-center mb-6">
-            <button id="list-back" class="text-[11px] tracking-widest uppercase text-gray-500 hover:text-black">← Всі товари</button>
-            <h2 id="list-title" class="text-base tracking-widest font-semibold uppercase mt-3"></h2>
+    <!-- КАТАЛОГ -->
+    <main id="catalog" class="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 pt-14 pb-6 scroll-mt-16">
+        <div class="flex items-end justify-between mb-6">
+            <h2 class="display text-xl md:text-3xl uppercase">Каталог</h2>
+        </div>
+        <div id="cat-chips" class="flex gap-2 overflow-x-auto scrollbar-none pb-4 mb-6"></div>
+        <div id="list-head" class="hidden text-center mb-8">
+            <button id="list-back" class="text-[11px] tracking-[.2em] uppercase text-gray-500 hover:text-black">← Всі товари</button>
+            <h2 id="list-title" class="display text-lg md:text-2xl uppercase mt-3"></h2>
             <p id="list-count" class="text-[11px] text-gray-400 mt-1"></p>
         </div>
-        <div id="products-grid" class="grid grid-cols-2 gap-x-5 gap-y-7"></div>
-
-        <!-- VIEW ALL BUTTON -->
-        <div id="view-all-container" class="mt-10 flex justify-center pure-white-bg">
-            <button id="view-all-btn" class="border border-black px-8 py-3 text-xs uppercase tracking-wider font-medium hover:bg-black hover:text-white transition-colors bg-white">Показати всі</button>
+        <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10">
+            <div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div><div><div class="skel aspect-[4/5]"></div><div class="skel h-3 w-2/3 mt-3"></div><div class="skel h-3 w-1/3 mt-2"></div></div>
         </div>
-
-        <!-- FOOTER SECTION -->
-        <section class="mt-16 text-center space-y-6 px-4 pure-white-bg">
-            <!-- Social Icons -->
-            <div class="flex justify-center items-center space-x-5 pure-white-bg">
-                <!-- Instagram Icon -->
-                <a href="#" aria-label="Instagram" class="text-black hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                </a>
-                <!-- TikTok Icon -->
-                <a href="#" aria-label="TikTok" class="text-black hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Footer Links & Copyright -->
-            <div class="site-foot text-[11px] text-gray-500 space-y-1.5 pt-2"></div>
-        </section>
-
+        <div id="view-all-container" class="mt-14 flex justify-center">
+            <button id="view-all-btn" class="border border-black px-10 py-3.5 text-[11px] uppercase tracking-[.2em] font-medium hover:bg-black hover:text-white transition-colors bg-white">Показати всі</button>
+        </div>
     </main>
+
+    <!-- ПЕРЕВАГИ -->
+    <section id="feat" class="max-w-6xl mx-auto w-full px-4 md:px-8 mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="flex flex-col items-center"><svg class="w-6 h-6 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10"/><path d="M15 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><p class="text-[11px] tracking-[.15em] uppercase font-medium">Доставка по Україні</p><p class="text-xs text-gray-500 mt-1">«Нова пошта»</p></div>
+        <div class="flex flex-col items-center"><svg class="w-6 h-6 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><p class="text-[11px] tracking-[.15em] uppercase font-medium">Зручна оплата</p><p class="text-xs text-gray-500 mt-1">повна або передоплата</p></div>
+        <div class="flex flex-col items-center"><svg class="w-6 h-6 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg><p class="text-[11px] tracking-[.15em] uppercase font-medium">Повернення</p><p class="text-xs text-gray-500 mt-1"><span id="ft-return">14</span> днів на повернення</p></div>
+        <div class="flex flex-col items-center"><svg class="w-6 h-6 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p class="text-[11px] tracking-[.15em] uppercase font-medium">Підтримка</p><p class="text-xs text-gray-500 mt-1">відповідаємо в месенджерах</p></div>
+    </section>
+
+    <!-- ФУТЕР -->
+    <footer class="bg-black text-white mt-20">
+        <div class="max-w-6xl mx-auto px-6 md:px-8 py-14 grid md:grid-cols-2 gap-10">
+            <div>
+                <p id="ft-name" class="display text-xl uppercase tracking-[.15em]">Esint shop</p>
+                <p class="text-xs text-gray-400 mt-3 max-w-xs leading-relaxed">Доставка по всій Україні «Новою поштою».</p>
+                <div class="flex items-center space-x-5 mt-5">
+                    <a href="#" aria-label="Instagram" class="hover:opacity-60 transition-opacity"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                    <a href="#" aria-label="TikTok" class="hover:opacity-60 transition-opacity"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+                </div>
+            </div>
+            <div>
+                <p class="text-[10px] tracking-[.25em] uppercase text-gray-500 mb-4">Контакти</p>
+                <div id="ft-contacts" class="space-y-2 text-xs text-gray-300"></div>
+            </div>
+        </div>
+        <div class="border-t border-white/10"><div class="site-foot max-w-6xl mx-auto px-6 md:px-8 py-6 text-[11px] text-gray-500 space-y-1.5"></div></div>
+    </footer>
     <!-- PRODUCTS GRID & FOOTER END -->
 
-    <!-- 1. NAVIGATION DRAWER (Left Slide-out Menu) -->
+    <!-- 1. МЕНЮ -->
     <div id="menu-drawer" class="fixed inset-0 z-50 pointer-events-none">
-        <div id="menu-backdrop" class="absolute inset-0 bg-black/40 opacity-0 drawer-backdrop"></div>
-        <div id="menu-panel" class="absolute inset-y-0 left-0 max-w-[320px] w-full bg-white shadow-2xl transform -translate-x-full drawer-panel flex flex-col">
-            
-            <!-- Drawer Header -->
-            <div class="p-6 flex items-center justify-end">
-                <button id="menu-close" aria-label="Close Menu" class="p-2 -mr-2 text-black hover:opacity-60 focus:outline-none transition-opacity">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+        <div id="menu-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 drawer-backdrop"></div>
+        <div id="menu-panel" class="absolute inset-y-0 left-0 max-w-[400px] w-[88%] bg-white shadow-2xl transform -translate-x-full drawer-panel flex flex-col">
+            <div class="px-7 h-20 flex items-center justify-between border-b border-gray-100 flex-none">
+                <span id="menu-brand" class="display text-sm uppercase tracking-[.22em]">Esint shop</span>
+                <button id="menu-close" aria-label="Закрити" class="p-2 -mr-2 hover:opacity-60 transition-opacity"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
-
-            <!-- Navigation Links -->
-            <nav class="px-6 py-2 space-y-6 text-xs tracking-widest font-semibold uppercase flex-1 overflow-y-auto">
-                
-                <!-- Item 1: Expandable CLOTHING CATEGORIES -->
-                <div class="border-b border-gray-100 pb-5">
-                    <button id="categories-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>КАТЕГОРІЇ</span>
-                        <svg id="categories-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    <!-- Submenu -->
-                    <div id="categories-submenu" class="accordion-content pl-3 space-y-3.5 pt-4 text-[11px] tracking-wider text-gray-500 font-normal"></div>
-                </div>
-
-                <!-- Item 2: Expandable BRANDS -->
-                <div class="border-b border-gray-100 pb-5">
-                    <button id="brands-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>БРЕНДИ</span>
-                        <svg id="brands-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    <!-- Submenu -->
-                    <div id="brands-submenu" class="accordion-content pl-3 space-y-3.5 pt-4 text-[11px] tracking-wider text-gray-500 font-normal"></div>
-                </div>
-
-                <!-- Item 3: CONTACTS -->
-                <div class="border-b border-gray-100 pb-5">
-                    <button id="contacts-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>КОНТАКТИ</span>
-                        <svg id="contacts-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    <!-- Submenu -->
-                    <div id="contacts-submenu" class="accordion-content pl-3 space-y-3 pt-4 text-[11px] tracking-wider text-gray-500 font-normal normal-case">
-                        <p class="flex items-center space-x-2">
-                            <span class="font-medium text-black uppercase text-[10px]">EMAIL:</span>
-                            <a href="mailto:support@store.com" class="hover:underline">SUPPORT@STORE.COM</a>
-                        </p>
-                        <p class="flex items-center space-x-2">
-                            <span class="font-medium text-black uppercase text-[10px]">INSTAGRAM:</span>
-                            <a href="#" class="hover:underline">@STORE_OFFICIAL</a>
-                        </p>
-                        <p class="flex items-center space-x-2">
-                            <span class="font-medium text-black uppercase text-[10px]">TELEGRAM:</span>
-                            <a href="#" class="hover:underline">t.me/store_support</a>
-                        </p>
-                        <p class="text-[10px] text-gray-400 uppercase pt-1">MON - FRI: 10:00 - 19:00</p>
-                    </div>
-                </div>
+            <nav class="px-7 py-7 flex-1 overflow-y-auto">
+                <p class="eyebrow">Категорії</p>
+                <div id="categories-submenu"></div>
+                <p class="eyebrow mt-10">Бренди</p>
+                <div id="brands-submenu" class="flex flex-wrap gap-2 pt-1"></div>
+                <p class="eyebrow mt-10">Контакти</p>
+                <div id="contacts-submenu" class="space-y-2.5 text-[13px] text-gray-600 pt-1"></div>
             </nav>
-
-            <!-- Menu Footer Info -->
-            <div class="p-6 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-normal tracking-wide">
+            <div class="px-7 py-5 border-t border-gray-100 flex items-center justify-between text-[11px] tracking-wider text-gray-400 flex-none">
                 <span>UAH (₴)</span>
-                <span>ПІДТРИМКА</span>
+                <a href="legal.html?doc=delivery" class="hover:text-black transition-colors uppercase">Доставка й оплата</a>
             </div>
         </div>
     </div>
 
-    <!-- 2. SEARCH MODAL -->
+    <!-- 2. ПОШУК -->
     <div id="search-modal" class="fixed inset-0 z-50 bg-white opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col">
-        <div class="p-5 flex items-center justify-between border-b border-gray-100 max-w-md mx-auto w-full">
-            <div class="flex items-center flex-1 space-x-3 bg-gray-50 px-4 py-2.5 rounded-xl">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input id="search-input" type="text" placeholder="Пошук: товар, бренд, категорія..." class="bg-transparent w-full text-xs tracking-wider focus:outline-none placeholder-gray-400">
+        <div class="border-b border-gray-100 flex-none">
+            <div class="max-w-5xl mx-auto w-full px-5 md:px-8 h-20 flex items-center gap-4">
+                <svg class="w-5 h-5 text-gray-400 flex-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input id="search-input" type="text" autocomplete="off" placeholder="Що шукаєте?" class="flex-1 min-w-0 bg-transparent text-lg md:text-2xl focus:outline-none placeholder-gray-300">
+                <button id="search-close" class="text-[11px] tracking-[.2em] uppercase text-gray-500 hover:text-black transition-colors">Закрити</button>
             </div>
-            <button id="search-close" class="ml-4 text-xs tracking-widest font-semibold uppercase hover:opacity-60 transition-opacity">СКАСУВАТИ</button>
         </div>
-        
-        <!-- Search body -->
-        <div class="max-w-md mx-auto w-full p-6 flex-1 overflow-y-auto">
-            <div id="search-suggest" class="space-y-4">
-                <p class="text-[10px] font-semibold text-gray-400 tracking-widest uppercase">ПОПУЛЯРНІ ЗАПИТИ</p>
-                <div id="search-chips" class="flex flex-wrap gap-2 text-xs"></div>
-            </div>
-            <div id="search-results" class="space-y-4 hidden"></div>
-        </div>
-    </div>
-
-    <!-- 3. CART DRAWER (Right Side) -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none">
-        <div id="cart-backdrop" class="absolute inset-0 bg-black/40 opacity-0 drawer-backdrop"></div>
-        <div id="cart-panel" class="absolute inset-y-0 right-0 max-w-[340px] w-full bg-white shadow-2xl transform translate-x-full drawer-panel flex flex-col">
-            
-            <div class="p-6 flex items-center justify-between border-b border-gray-100">
-                <span id="cart-title" class="font-semibold tracking-wider text-xs uppercase">КОШИК (0)</span>
-                <button id="cart-close" aria-label="Close Cart" class="p-2 -mr-2 text-black hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Cart Items List -->
-            <div id="cart-items" class="p-6 flex-1 overflow-y-auto space-y-6"></div>
-
-            <!-- Cart Checkout Area -->
-            <div class="p-6 border-t border-gray-100 space-y-4">
-                <div class="flex justify-between text-xs font-semibold tracking-wider uppercase">
-                    <span>РАЗОМ</span>
-                    <span id="cart-total">0 ₴</span>
+        <div class="flex-1 overflow-y-auto">
+            <div class="max-w-5xl mx-auto w-full px-5 md:px-8 py-8">
+                <div id="search-suggest">
+                    <p class="eyebrow mb-3">Популярні запити</p>
+                    <div id="search-chips" class="flex flex-wrap gap-2"></div>
                 </div>
-                <p class="text-[10px] text-gray-400">Доставку «Новою поштою» оплачує покупець за тарифами перевізника.</p>
-                <button id="cart-checkout" class="w-full bg-black text-white py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase hover:bg-gray-800 transition-colors">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
-                <button id="cart-continue" class="w-full text-center text-xs tracking-wider uppercase text-gray-400 hover:text-black transition-colors pt-1">ПРОДОВЖИТИ ПОКУПКИ</button>
+                <div id="search-results" class="hidden grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8"></div>
             </div>
         </div>
     </div>
 
-<div id="product-page">
-    <div id="pp-toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 z-[60] pointer-events-none" style="opacity:0;transition:opacity .2s"></div>
-    <div class="max-w-md mx-auto w-full bg-white">
+    <!-- 3. КОШИК -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none">
+        <div id="cart-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 drawer-backdrop"></div>
+        <div id="cart-panel" class="absolute inset-y-0 right-0 max-w-[440px] w-[92%] bg-white shadow-2xl transform translate-x-full drawer-panel flex flex-col">
+            <div class="px-7 h-20 flex items-center justify-between border-b border-gray-100 flex-none">
+                <span id="cart-title" class="display text-sm uppercase tracking-[.2em]">КОШИК (0)</span>
+                <button id="cart-close" aria-label="Закрити" class="p-2 -mr-2 hover:opacity-60 transition-opacity"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="cart-items" class="px-7 py-6 flex-1 overflow-y-auto space-y-6"></div>
+            <div class="px-7 py-6 border-t border-gray-100 space-y-4 bg-white flex-none">
+                <div class="flex justify-between items-baseline">
+                    <span class="eyebrow !mb-0">Разом</span>
+                    <span id="cart-total" class="display text-lg">0 ₴</span>
+                </div>
+                <p class="text-[11px] text-gray-400 leading-relaxed">Доставку «Новою поштою» оплачує покупець за тарифами перевізника.</p>
+                <button id="cart-checkout" class="w-full bg-black text-white h-14 text-[12px] tracking-[.2em] uppercase hover:bg-gray-800 transition-colors">Оформити замовлення</button>
+                <button id="cart-continue" class="w-full text-center text-[11px] tracking-[.2em] uppercase text-gray-400 hover:text-black transition-colors">Продовжити покупки</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- Header з відео -->
-        <header class="px-5 h-20 grid grid-cols-3 items-center">
-            <div class="flex items-center space-x-6">
-                <button id="pp-menu" aria-label="Menu" class="p-1 hover:opacity-60 transition-opacity">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line></svg>
-                </button>
-                <button id="pp-search" aria-label="Search" class="p-1 hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </button>
-            </div>
-            <div class="flex justify-center">
-                <video id="pp-video" class="h-16 w-auto object-cover bg-white cursor-pointer" autoplay muted loop playsinline>
-                    <source src="video_2026-10-11_21-12-06.mp4" type="video/mp4">
-                </video>
-            </div>
-            <div class="flex justify-end">
-                <button id="pp-cart" aria-label="Cart" class="p-1 hover:opacity-60 transition-opacity relative">
-                    <span id="pp-badge" class="absolute -top-1 -right-1 bg-black text-white text-[9px] w-4 h-4 rounded-full items-center justify-center font-semibold" style="display:none">0</span>
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                </button>
+    <div id="product-page">
+    <div id="pp-toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 z-[60] pointer-events-none" style="opacity:0;transition:opacity .2s"></div>
+    <div class="w-full bg-white min-h-full">
+        <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-100">
+            <div class="max-w-6xl mx-auto px-5 md:px-8 h-20 grid grid-cols-3 items-center">
+                <div class="flex items-center space-x-6">
+                    <button id="pp-menu" aria-label="Меню" class="p-1 hover:opacity-60 transition-opacity"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line></svg></button>
+                    <button id="pp-search" aria-label="Пошук" class="p-1 hover:opacity-60 transition-opacity"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
+                </div>
+                <div class="flex justify-center">
+                    <video id="pp-video" class="h-16 w-auto object-cover bg-white cursor-pointer" autoplay muted loop playsinline><source src="video_2026-10-11_21-12-06.mp4" type="video/mp4"></video>
+                </div>
+                <div class="flex justify-end">
+                    <button id="pp-cart" aria-label="Кошик" class="p-1 hover:opacity-60 transition-opacity relative">
+                        <span id="pp-badge" class="absolute -top-1 -right-1 bg-black text-white text-[9px] w-4 h-4 rounded-full items-center justify-center font-semibold" style="display:none">0</span>
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Фото -->
-        <div class="px-2 pt-4"><div id="pp-gallery" class="pp-scroll" style="gap:0"></div><div id="pp-dots" class="flex justify-center gap-1.5 mt-3"></div></div>
-
-        <!-- Назва, ціна, розміри -->
-        <section class="px-5 pt-8 text-center">
-            <h1 id="pp-title" class="text-[34px] leading-[1.1] font-normal"></h1>
-            <div id="pp-price" class="text-xl mt-6 space-x-2"></div>
-            <p class="text-[13px] mt-6 mb-2">Розмір</p>
-            <div id="pp-sizes" class="grid grid-cols-4 gap-2"></div>
-            <p id="pp-left" class="text-[11px] text-gray-500 mt-2 h-4"></p>
-            <button id="pp-add" class="w-full bg-black text-white h-12 mt-3 flex items-center justify-center space-x-2 text-sm">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span id="pp-add-text">Додати в кошик</span>
-            </button>
-        </section>
-
-        <!-- Таби -->
-        <section class="px-4 mt-10">
-            <div class="flex text-center">
-                <button class="pp-tab active" data-tab="desc">Опис</button>
-                <button class="pp-tab" data-tab="ship">Доставка</button>
-                <button class="pp-tab" data-tab="ret">Повернення</button>
+        <div class="max-w-6xl mx-auto md:px-8 md:pt-8 md:grid md:grid-cols-2 md:gap-14">
+            <div class="px-2 pt-4 md:px-0 md:pt-0 md:sticky md:top-28 self-start">
+                <div id="pp-gallery" class="pp-scroll" style="gap:0"></div>
+                <div id="pp-dots" class="flex justify-center gap-1.5 mt-3"></div>
             </div>
-            <div id="tab-desc" class="pp-panel text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
-            <div id="tab-ship" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
-            <div id="tab-ret" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
-        </section>
-
-        <!-- You may like it -->
-        <section class="mt-14 pl-4">
-            <h2 class="text-[32px] font-normal mb-6">Вам може сподобатись</h2>
-            <div id="pp-related" class="pp-scroll pr-4"></div>
-        </section>
-
-        <!-- Footer -->
-        <section class="mt-16 pb-10 text-center space-y-4 px-4">
-            <div class="flex justify-center items-center space-x-5">
-                <a href="#" aria-label="Instagram" class="hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                </a>
-                <a href="#" aria-label="TikTok" class="hover:opacity-60 transition-opacity">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-                </a>
+            <div>
+                <section class="px-5 md:px-0 pt-8 md:pt-4 text-center md:text-left">
+                    <h1 id="pp-title" class="display text-2xl md:text-3xl leading-[1.15] uppercase"></h1>
+                    <div id="pp-price" class="text-xl mt-5 space-x-2"></div>
+                    <p class="text-[11px] tracking-[.15em] uppercase mt-7 mb-2 text-gray-500">Розмір</p>
+                    <div id="pp-sizes" class="grid grid-cols-4 gap-2"></div>
+                    <p id="pp-left" class="text-[11px] text-gray-500 mt-2 h-4"></p>
+                    <div class="sticky bottom-0 bg-white py-3 mt-2 z-10">
+                        <button id="pp-add" class="w-full bg-black text-white h-14 flex items-center justify-center space-x-2 text-[12px] tracking-[.2em] uppercase hover:bg-gray-800 transition-colors">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            <span id="pp-add-text">Додати в кошик</span>
+                        </button>
+                    </div>
+                </section>
+                <section class="px-4 md:px-0 mt-8">
+                    <div class="flex text-center">
+                        <button class="pp-tab active" data-tab="desc">Опис</button>
+                        <button class="pp-tab" data-tab="ship">Доставка</button>
+                        <button class="pp-tab" data-tab="ret">Повернення</button>
+                    </div>
+                    <div id="tab-desc" class="pp-panel text-[13px] text-[#333] whitespace-pre-line leading-relaxed pt-5"></div>
+                    <div id="tab-ship" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line leading-relaxed pt-5"></div>
+                    <div id="tab-ret" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line leading-relaxed pt-5"></div>
+                </section>
             </div>
-            <div class="site-foot text-[11px] text-gray-500 space-y-1.5 pt-2"></div>
+        </div>
+
+        <section class="max-w-6xl mx-auto mt-16 pl-4 md:px-8">
+            <h2 class="display text-xl md:text-2xl uppercase mb-6">Вам може сподобатись</h2>
+            <div id="pp-related" class="pp-scroll pr-4 md:pr-0"></div>
         </section>
+
+        <div class="site-foot text-[11px] text-gray-500 space-y-1.5 text-center px-4 pt-16 pb-10"></div>
     </div>
 </div>
 
     <div id="checkout" class="fixed inset-0 z-[55] bg-white overflow-y-auto" style="display:none">
         <div class="max-w-md mx-auto px-5 py-6">
             <div id="co-form">
-                <div class="flex items-center justify-between mb-6">
-                    <button id="co-back" class="text-[11px] tracking-widest uppercase text-gray-500">← Кошик</button>
-                    <button id="co-close" class="text-2xl leading-none" aria-label="Закрити">&times;</button>
+                <div class="grid grid-cols-3 items-center mb-6">
+                    <button id="co-back" class="text-[11px] tracking-widest uppercase text-gray-500 text-left">← Кошик</button>
+                    <video class="h-14 w-auto mx-auto object-cover bg-white" autoplay muted loop playsinline><source src="video_2026-10-11_21-12-06.mp4" type="video/mp4"></video>
+                    <button id="co-close" class="text-2xl leading-none text-right" aria-label="Закрити">&times;</button>
                 </div>
                 <h2 class="text-sm font-semibold tracking-widest uppercase mb-4">Оформлення замовлення</h2>
                 <div id="co-summary" class="space-y-2 text-xs mb-6"></div>
@@ -514,13 +469,21 @@
     function card(p, i) {
         const sold = isSold(p);
         const badge = sold
-            ? '<span class="absolute top-1.5 right-1.5 bg-black text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase z-10 shadow-sm">Продано</span>'
-            : p.discount > 0 ? '<span class="absolute top-1.5 right-1.5 bg-[#b91c1c] text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase z-10 shadow-sm">Sale</span>' : '';
-        return '<div data-i="' + i + '" class="' + (i >= 15 ? 'extra-product flex-col' : 'flex flex-col') + ' text-center group cursor-pointer pure-white-bg">' +
-            '<div class="relative w-full aspect-[4/4.8] pure-white-bg mb-2 overflow-hidden flex items-center justify-center">' + badge +
-            '<img loading="lazy" src="' + esc(p.image) + '" alt="' + esc(fullName(p)) + '" class="w-full h-full object-cover product-img"></div>' +
-            '<h3 class="text-[11px] font-semibold tracking-wider uppercase leading-snug mb-1">' + esc(fullName(p)) + '</h3>' +
-            '<div class="text-xs font-medium space-x-1">' + priceHtml(p) + '</div></div>';
+            ? '<span class="absolute top-2 left-2 bg-black text-white text-[10px] px-2.5 py-1 tracking-[.15em] uppercase z-10">Продано</span>'
+            : p.discount > 0 ? '<span class="absolute top-2 left-2 bg-[#b91c1c] text-white text-[10px] px-2.5 py-1 tracking-[.15em] uppercase z-10">−' + Math.round(p.discount) + '%</span>' : '';
+        const second = p.images && p.images[1] ? '<img loading="lazy" src="' + esc(p.images[1]) + '" alt="" class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 product-img">' : '';
+        return '<div data-i="' + i + '" class="rv ' + (i >= 12 ? 'extra-product flex-col' : 'flex flex-col') + ' group cursor-pointer">' +
+            '<div class="relative w-full aspect-[4/5] bg-white overflow-hidden mb-3">' + badge +
+            '<img loading="lazy" src="' + esc(p.image) + '" alt="' + esc(fullName(p)) + '" class="w-full h-full object-cover product-img transition-transform duration-700 group-hover:scale-[1.04]' + (sold ? ' opacity-60' : '') + '">' + second + '</div>' +
+            '<h3 class="text-[12px] font-medium tracking-wide uppercase leading-snug">' + esc(fullName(p)) + '</h3>' +
+            '<div class="text-xs mt-1 space-x-1">' + priceHtml(p) + '</div></div>';
+    }
+    function reveal(root) {
+        const els = root.querySelectorAll('.rv');
+        if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+        const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -40px 0px' });
+        els.forEach(e => io.observe(e));
+        setTimeout(() => els.forEach(e => e.classList.add('in')), 2500);
     }
 
     function renderGrid() {
@@ -530,11 +493,17 @@
         const grid = $id('products-grid');
         grid.innerHTML = view.length ? view.map(card).join('') : '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Нічого не знайдено</p>';
         grid.querySelectorAll('[data-i]').forEach(c => c.addEventListener('click', () => openProduct(view[c.dataset.i])));
-        $id('view-all-container').style.display = view.length > 15 ? 'flex' : 'none';
+        $id('view-all-container').style.display = view.length > 12 ? 'flex' : 'none';
         const t = query ? 'Пошук: ' + query : filter ? (filter.type === 'sale' ? 'Sale' : filter.value) : '';
         $id('list-head').classList.toggle('hidden', !t);
         $id('list-title').textContent = t;
         $id('list-count').textContent = view.length + ' шт.';
+        document.body.classList.toggle('list-mode', !!(filter || query));
+        document.querySelectorAll('#cat-chips [data-ft]').forEach(c => {
+            const on = c.dataset.ft === 'all' ? !filter && !query : !!filter && filter.type === c.dataset.ft && (filter.value || '') === c.dataset.fv;
+            c.classList.toggle('on', on);
+        });
+        reveal(grid);
     }
 
     function showList(f, q) {
@@ -550,15 +519,21 @@
     // ---------- меню, контакти, підвал ----------
     const link = (v, base) => /^https?:/i.test(v) ? v : base + v.replace(/^@/, '').replace(/^t\.me\//, '');
     function buildMenus() {
-        const a = (t, v, label, cls) => '<a href="#" data-ft="' + t + '" data-fv="' + esc(v) + '" class="block hover:text-black transition-colors ' + (cls || '') + '">' + esc(label).toUpperCase() + '</a>';
+        const a = (t, v, label, cls) => '<a href="#" data-ft="' + t + '" data-fv="' + esc(v) + '" class="menu-link ' + (cls || '') + '"><span>' + esc(label) + '</span><span class="menu-arr">→</span></a>';
         $id('categories-submenu').innerHTML = a('all', '', 'Усі товари') + DATA.categories.map(c => a('category', c, c)).join('') + a('sale', '', 'Sale', 'text-red-600 font-medium');
-        $id('brands-submenu').innerHTML = DATA.brands.map(b => a('brand', b, b)).join('');
+        $id('brands-submenu').innerHTML = DATA.brands.map(b => '<a href="#" data-ft="brand" data-fv="' + esc(b) + '" class="chip-f">' + esc(b) + '</a>').join('');
+        const chip = (t, v, label) => '<button data-ft="' + t + '" data-fv="' + esc(v) + '" class="chip-f">' + esc(label) + '</button>';
+        $id('cat-chips').innerHTML = chip('all', '', 'Усі') + DATA.categories.map(c => chip('category', c, c)).join('') + chip('sale', '', 'Sale');
         $id('search-chips').innerHTML = DATA.categories.concat(DATA.brands)
-            .map(v => '<span class="chip px-3.5 py-2 bg-gray-100 rounded-full cursor-pointer hover:bg-black hover:text-white transition-colors">' + esc(v) + '</span>').join('');
+            .map(v => '<span class="chip chip-f cursor-pointer">' + esc(v) + '</span>').join('');
     }
     function applySettings() {
         const s = SET, name = (s.store_name || '').trim();
-        if (name) document.title = name;
+        if (name) { document.title = name; ['hd-logo', 'hero-title', 'ft-name', 'menu-brand'].forEach(id => { const el = $id(id); if (el) el.textContent = name; }); }
+        const pre = parseInt(s.prepay_amount) || 0, rd = s.return_days || '14';
+        const mq = ['Нова колекція', 'Доставка «Новою поштою»', pre > 0 ? 'Передоплата від ' + pre + ' ₴' : '', 'Повернення ' + rd + ' днів'].filter(Boolean).join('   ✦   ');
+        $id('mq').innerHTML = '<span>' + (mq + '   ✦   ').repeat(3) + '</span><span>' + (mq + '   ✦   ').repeat(3) + '</span>';
+        $id('ft-return').textContent = rd;
         const rows = [];
         if (s.contact_email) rows.push(['EMAIL', '<a href="mailto:' + esc(s.contact_email) + '" class="hover:underline">' + esc(s.contact_email) + '</a>']);
         if (s.contact_phone) rows.push(['ТЕЛ.', '<a href="tel:' + esc(s.contact_phone) + '" class="hover:underline">' + esc(s.contact_phone) + '</a>']);
@@ -574,6 +549,7 @@
             (s.fop_name ? '<p>ФОП ' + esc(s.fop_name) + (s.fop_id ? ', РНОКПП ' + esc(s.fop_id) : '') + '</p>' : '') +
             (s.dev_credit ? '<p>' + esc(s.dev_credit) + '</p>' : '');
         document.querySelectorAll('.site-foot').forEach(f => f.innerHTML = foot);
+        $id('ft-contacts').innerHTML = rows.map(r => '<p class="flex gap-3"><span class="text-gray-500 uppercase text-[10px] pt-0.5 w-20 flex-none">' + r[0] + '</span>' + r[1] + '</p>').join('') + (s.work_hours ? '<p class="text-gray-500 pt-1">' + esc(s.work_hours) + '</p>' : '') || '<p class="text-gray-500">Контакти скоро з\'являться</p>';
         $id('tab-ship').innerHTML = 'Відправляємо «Новою поштою» протягом ' + esc(s.ship_days || '1-2') + ' робочих днів після підтвердження оплати. Номер ТТН надсилаємо після відправлення.\n\nПодробиці: <a class="underline" href="legal.html?doc=delivery">Доставка й оплата</a>.';
         $id('tab-ret').innerHTML = 'Протягом ' + esc(s.return_days || '14') + ' днів з моменту отримання можна повернути або обміняти товар належної якості, якщо він не використовувався й збережено ярлики.\n\nПодробиці: <a class="underline" href="legal.html?doc=returns">Повернення й обмін</a>.';
     }
@@ -595,12 +571,11 @@
         if (!q) return;
         const found = DATA.products.filter(p => matches(p, q));
         sRes.innerHTML = found.length
-            ? found.slice(0, 30).map(p => '<div data-sp="' + DATA.products.indexOf(p) + '" class="flex items-center space-x-4 cursor-pointer">' +
-                '<img src="' + esc(p.image) + '" class="w-14 h-[68px] object-cover bg-white flex-shrink-0 product-img">' +
-                '<div class="min-w-0"><p class="text-xs font-semibold tracking-wider uppercase">' + esc(fullName(p)) + '</p>' +
-                '<p class="text-[11px] text-gray-400 mt-0.5">' + esc(p.brand) + '</p><div class="text-xs mt-1 space-x-1">' + priceHtml(p) + '</div></div></div>').join('') +
-              '<button id="search-all" class="w-full border border-black py-3 text-xs uppercase tracking-wider mt-2">Показати всі (' + found.length + ')</button>'
-            : '<p class="text-xs text-gray-400">Нічого не знайдено</p>';
+            ? found.slice(0, 40).map(p => '<div data-sp="' + DATA.products.indexOf(p) + '" class="cursor-pointer group">' +
+                '<div class="aspect-[4/5] bg-white overflow-hidden mb-2"><img src="' + esc(p.image) + '" class="w-full h-full object-cover product-img transition-transform duration-500 group-hover:scale-[1.04]"></div>' +
+                '<p class="text-[11px] font-medium tracking-wide uppercase leading-snug">' + esc(fullName(p)) + '</p><div class="text-xs mt-1 space-x-1">' + priceHtml(p) + '</div></div>').join('') +
+              '<button id="search-all" class="col-span-full border border-black py-3.5 text-[11px] uppercase tracking-[.2em] mt-2">Показати всі (' + found.length + ')</button>'
+            : '<p class="col-span-full text-sm text-gray-400">Нічого не знайдено</p>';
     }
     function searchAll() { const q = searchInput.value.trim(); if (!q) return; searchClose.click(); showList(null, q); }
     searchInput.addEventListener('input', runSearch);
@@ -722,17 +697,16 @@
         ['cart-badge', 'pp-badge'].forEach(id => { const b = $id(id); b.textContent = count; b.style.display = count ? 'flex' : 'none'; });
         $id('cart-title').textContent = 'КОШИК (' + count + ')';
         $id('cart-items').innerHTML = lines.map(({ it, idx, p }) =>
-            '<div class="flex items-center space-x-4 border-b border-gray-100 pb-4">' +
-            '<img src="' + esc(p.image) + '" class="w-16 h-20 object-cover bg-white flex-shrink-0 product-img">' +
-            '<div class="flex-1 space-y-1 min-w-0"><h4 class="text-xs font-semibold tracking-wider uppercase">' + esc(fullName(p)) + '</h4>' +
-            (it.size ? '<p class="text-[11px] text-gray-400">Розмір ' + esc(it.size) + '</p>' : '') +
-            '<p class="text-xs font-semibold">' + fmt(finalPrice(p)) + '</p>' +
-            '<div class="flex items-center space-x-3 pt-1">' +
-            '<button data-c="dec" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">−</button>' +
-            '<span class="text-xs w-4 text-center">' + it.qty + '</span>' +
-            '<button data-c="inc" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">+</button>' +
-            '<button data-c="del" data-k="' + idx + '" class="text-[11px] text-gray-400 hover:text-black underline ml-2">Видалити</button></div></div></div>'
-        ).join('') || '<p class="text-xs text-gray-400 text-center py-10">Кошик порожній</p>';
+            '<div class="flex gap-4">' +
+            '<img src="' + esc(p.image) + '" class="w-20 h-24 object-cover bg-white flex-shrink-0 product-img">' +
+            '<div class="flex-1 min-w-0 flex flex-col">' +
+            '<div class="flex justify-between gap-3"><h4 class="text-[12px] font-medium tracking-wide uppercase leading-snug">' + esc(fullName(p)) + '</h4>' +
+            '<button data-c="del" data-k="' + idx + '" aria-label="Видалити" class="text-gray-400 hover:text-black text-xl leading-none -mt-1">×</button></div>' +
+            (it.size ? '<p class="text-[11px] text-gray-400 mt-1">Розмір ' + esc(it.size) + '</p>' : '') +
+            '<div class="mt-auto flex items-center justify-between pt-3">' +
+            '<div class="inline-flex items-center border border-gray-200"><button data-c="dec" data-k="' + idx + '" class="w-8 h-8 text-sm hover:bg-gray-50">−</button><span class="w-8 text-center text-xs">' + it.qty + '</span><button data-c="inc" data-k="' + idx + '" class="w-8 h-8 text-sm hover:bg-gray-50">+</button></div>' +
+            '<span class="text-sm font-medium">' + fmt(finalPrice(p) * it.qty) + '</span></div></div></div>'
+        ).join('') || '<p class="text-xs text-gray-400 text-center py-20 tracking-wide">Ваш кошик порожній</p>';
         $id('cart-total').textContent = fmt(lines.reduce((n, l) => n + finalPrice(l.p) * l.it.qty, 0));
         $id('cart-checkout').disabled = !lines.length;
         $id('cart-checkout').classList.toggle('opacity-40', !lines.length);
@@ -840,6 +814,9 @@
     }
     renderCart();
     loadData().catch(() => { $id('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити товари. Оновіть сторінку.</p>'; });
+
+    $id('hd-logo').addEventListener('click', e => { e.preventDefault(); closeProduct(true); resetList(); window.scrollTo(0, 0); });
+    $id('hd-video').addEventListener('click', () => { closeProduct(true); resetList(); });
 
     // ---------- СВАЙП, щоб закрити меню (вліво) і кошик (вправо) ----------
     function swipeClose(panel, backdrop, dir, close) {
