@@ -15,11 +15,12 @@
         .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #777; display: block; margin: 14px 0 5px; }
         .btn { background: #000; color: #fff; padding: 10px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
         .btn-o { border: 1px solid #000; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: #fff; }
+        .tab { padding: 10px 14px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; border-bottom: 2px solid transparent; color: #777; }
+        .tab.on { color: #000; border-color: #000; }
     </style>
 </head>
 <body class="bg-gray-50 text-black min-h-screen">
 
-<!-- ВХІД -->
 <div id="login" class="min-h-screen flex items-center justify-center p-6">
     <div class="bg-white p-8 w-full max-w-sm border">
         <h1 class="text-lg font-semibold mb-1">Адмінка</h1>
@@ -30,30 +31,18 @@
     </div>
 </div>
 
-<!-- ПАНЕЛЬ -->
 <div id="app" class="hidden max-w-3xl mx-auto p-4 pb-24">
-    <div class="flex items-center justify-between py-4">
-        <h1 class="text-lg font-semibold">Товари (<span id="count">0</span>)</h1>
-        <div class="space-x-2">
-            <button id="add-btn" class="btn">+ Додати товар</button>
-            <button id="logout" class="btn-o">Вийти</button>
-        </div>
+    <div class="flex items-center justify-between py-3">
+        <h1 class="text-lg font-semibold">Адмінка</h1>
+        <button id="logout" class="btn-o">Вийти</button>
     </div>
-
-    <div class="grid sm:grid-cols-2 gap-4 mb-6">
-        <div class="bg-white border p-4">
-            <p class="lbl !mt-0">Категорії</p>
-            <div id="cats" class="flex flex-wrap gap-2 mb-3"></div>
-            <div class="flex gap-2"><input id="new-cat" class="inp" placeholder="Нова категорія"><button id="add-cat" class="btn-o">+</button></div>
-        </div>
-        <div class="bg-white border p-4">
-            <p class="lbl !mt-0">Бренди</p>
-            <div id="brands" class="flex flex-wrap gap-2 mb-3"></div>
-            <div class="flex gap-2"><input id="new-brand" class="inp" placeholder="Новий бренд"><button id="add-brand" class="btn-o">+</button></div>
-        </div>
+    <div class="flex border-b mb-5 overflow-x-auto">
+        <button class="tab on" data-tab="products">Товари</button>
+        <button class="tab" data-tab="orders">Замовлення <span id="new-badge" class="hidden bg-red-600 text-white text-[10px] px-1.5 rounded-full ml-1"></span></button>
+        <button class="tab" data-tab="settings">Налаштування</button>
+        <button class="tab" data-tab="log">Журнал</button>
     </div>
-
-    <div id="list" class="space-y-2"></div>
+    <div id="view"></div>
 </div>
 
 <!-- ФОРМА ТОВАРУ -->
@@ -64,16 +53,16 @@
             <button id="close-form" class="text-2xl leading-none">&times;</button>
         </div>
 
-        <label class="lbl">Фото</label>
-        <img id="f-preview" class="w-32 h-40 object-cover bg-gray-100 mb-2 hidden">
-        <input id="f-file" type="file" accept="image/*" class="text-sm">
+        <label class="lbl">Фото (перше — головне)</label>
+        <div id="f-imgs" class="flex flex-wrap gap-2 mb-2"></div>
+        <input id="f-file" type="file" accept="image/*" multiple class="text-sm">
 
         <label class="lbl">Назва</label>
         <input id="f-name" class="inp" placeholder="Напр.: Гучі">
         <p id="f-fullname" class="text-xs text-gray-500 mt-1"></p>
 
         <label class="lbl">Опис</label>
-        <textarea id="f-desc" rows="5" class="inp" placeholder="Матеріал, догляд, посадка..."></textarea>
+        <textarea id="f-desc" rows="5" class="inp" placeholder="Матеріал, догляд, посадка, параметри моделі..."></textarea>
 
         <div class="grid grid-cols-2 gap-3">
             <div><label class="lbl">Ціна (₴)</label><input id="f-price" type="number" min="0" class="inp"></div>
@@ -86,12 +75,13 @@
             <div><label class="lbl">Бренд</label><select id="f-brand" class="inp"></select></div>
         </div>
 
-        <label class="lbl">Розміри</label>
-        <div id="f-sizes" class="grid grid-cols-5 gap-2"></div>
-        <p class="text-[11px] text-gray-400 mt-1">«—» розмір не продається · «Є» в наявності · «Нема» на сайті закреслений. Для аксесуарів без розмірів залиш усе «—».</p>
+        <label class="lbl">Кількість по розмірах</label>
+        <div id="f-stock" class="grid grid-cols-5 gap-2"></div>
+        <p class="text-[11px] text-gray-400 mt-1">Порожньо = такого розміру немає в продажу. 0 = розмір є, але закінчився (на сайті закреслений).</p>
+        <label class="lbl">Або кількість, якщо розмірів немає (аксесуари)</label>
+        <input id="st-ONE" type="number" min="0" class="inp" placeholder="шт.">
 
-        <label class="flex items-center gap-2 mt-4 text-sm"><input id="f-sold" type="checkbox" class="w-4 h-4"> Sold out (весь товар)</label>
-
+        <label class="flex items-center gap-2 mt-4 text-sm"><input id="f-sold" type="checkbox" class="w-4 h-4"> Sold out (приховати весь товар із продажу)</label>
         <button id="save-btn" class="btn w-full mt-6">Зберегти</button>
     </div>
 </div>
@@ -101,174 +91,293 @@
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const fullName = p => { const n = (p.name || '').trim(), c = (p.category || '').trim(); return c && !n.toLowerCase().includes(c.toLowerCase()) ? n + ' ' + c : n; };
-if (SUPABASE_URL.includes('ТВІЙ')) alert('Заповни config.js: встав Project URL і ключ');
+const finalPrice = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
+const totalStock = p => Object.values(p.stock || {}).reduce((a, b) => a + (+b || 0), 0);
+const isSold = p => p.sold_out || totalStock(p) <= 0;
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 2600); };
+
 const sb = supabase.createClient(new URL(SUPABASE_URL.trim()).origin, SUPABASE_ANON_KEY.trim());
-let D = null, editId = null, img = '', imgCache = {}, chain = Promise.resolve();
-const final = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
-const sold = p => p.soldOut || (Object.keys(p.sizes || {}).length > 0 && !Object.values(p.sizes).some(Boolean));
-function toast(t) { const e = $('toast'); e.textContent = t; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 2400); }
+let P = [], O = [], LOG = [], D = { categories: [], brands: [] }, S = {}, tab = 'products', editId = null, imgs = [], oFilter = 'all', lastNew = null;
 
-async function load() {
-    const { data, error } = await sb.from('store_data').select('data').eq('id', 1).single();
-    if (error) throw new Error('Не вдалося завантажити дані: ' + error.message);
-    D = data.data;
+async function must(q) { const r = await q; if (r.error) { toast('Помилка: ' + r.error.message); throw r.error; } return r.data; }
+
+async function loadCore() {
+    const [sd, pr, st] = await Promise.all([
+        sb.from('store_data').select('data').eq('id', 1).single(),
+        sb.from('products').select('*').order('created_at', { ascending: false }),
+        sb.from('settings').select('*')]);
+    const err = sd.error || pr.error || st.error;
+    if (err) throw new Error(err.message + ' — перевір, що виконано setup2.sql');
+    D = { categories: sd.data.data.categories || [], brands: sd.data.data.brands || [] };
+    P = pr.data; S = Object.fromEntries(st.data.map(r => [r.key, r.value]));
 }
-
-// зберігаємо по черзі
-function save() {
-    chain = chain.then(async () => {
-        const { data, error } = await sb.from('store_data').update({ data: D, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
-        if (error || !data || !data.length) { toast('Не збереглось: перевір, що email у SQL збігається з email входу'); return false; }
-        toast('Збережено ✓ Вже на сайті');
-        return true;
-    }).catch(() => { toast('Помилка мережі'); return false; });
-    return chain;
+async function loadOrders() {
+    O = await must(sb.from('orders').select('*').order('id', { ascending: false }).limit(200));
+    const n = O.filter(o => o.status === 'new').length;
+    $('new-badge').textContent = n; $('new-badge').classList.toggle('hidden', !n);
+    if (lastNew !== null && n > lastNew) toast('🛍 Нове замовлення!');
+    lastNew = n;
 }
+const saveMeta = () => must(sb.from('store_data').update({ data: D, updated_at: new Date().toISOString() }).eq('id', 1).select('id'));
 
-async function uploadImage(dataUrl) {
-    const blob = await (await fetch(dataUrl)).blob();
-    const path = Date.now() + '.jpg';
-    const { error } = await sb.storage.from('images').upload(path, blob, { contentType: 'image/jpeg' });
-    if (error) throw new Error('Не вдалося завантажити фото: ' + error.message);
-    return sb.storage.from('images').getPublicUrl(path).data.publicUrl;
-}
-
+// ---------- вхід ----------
 async function start() {
-    await load();
+    await loadCore(); await loadOrders();
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
     render();
+    setInterval(async () => { try { await loadOrders(); if (tab === 'orders') render(); } catch (e) { } }, 30000);
 }
-async function logout() { await sb.auth.signOut(); location.reload(); }
-
 $('login-btn').onclick = async () => {
     const { error } = await sb.auth.signInWithPassword({ email: $('l-email').value.trim(), password: $('l-pass').value });
-    if (error) { $('login-err').textContent = 'Помилка входу: ' + error.message + (error.message.includes('Invalid login') ? ' (невірний email або пароль)' : ''); return $('login-err').classList.remove('hidden'); }
+    if (error) { $('login-err').textContent = 'Помилка входу: ' + error.message; return $('login-err').classList.remove('hidden'); }
     try { await start(); } catch (e) { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }
 };
 $('l-pass').addEventListener('keydown', e => e.key === 'Enter' && $('login-btn').click());
-$('logout').onclick = logout;
+$('logout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
-function chips(box, arr, key) {
-    $(box).innerHTML = arr.map((v, i) => '<span class="bg-gray-100 px-3 py-1 text-xs"><button data-rn="' + key + '" data-i="' + i + '" title="Перейменувати" class="hover:underline">' + esc(v) + '</button> <button data-k="' + key + '" data-i="' + i + '" class="ml-1 text-gray-400 hover:text-red-600">×</button></span>').join('');
-}
-
+// ---------- рендер ----------
 function render() {
-    $('count').textContent = D.products.length;
-    chips('cats', D.categories, 'categories'); chips('brands', D.brands, 'brands');
-    $('list').innerHTML = D.products.map(p => {
-        const s = sold(p);
-        return '<div class="bg-white border p-3 flex gap-3 items-center">' +
-            '<img src="' + esc(imgCache[p.image] || p.image) + '" class="w-14 h-[68px] object-cover bg-gray-100">' +
-            '<div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">' + esc(fullName(p)) + '</p>' +
-            '<p class="text-xs text-gray-500">' + esc(p.category) + ' · ' + esc(p.brand) + '</p>' +
-            '<p class="text-xs mt-1">' + (p.discount > 0 ? '<b>' + fmt(final(p)) + '</b> <s class="text-gray-400">' + fmt(p.price) + '</s> <span class="text-red-600">-' + Math.round(p.discount) + '%</span>' : '<b>' + fmt(p.price) + '</b>') +
-            (s ? ' <span class="bg-black text-white px-1.5 py-0.5 text-[10px] uppercase">Sold out</span>' : '') + '</p></div>' +
-            '<div class="flex flex-col gap-1">' +
-            '<button data-a="edit" data-id="' + p.id + '" class="btn-o">Змінити</button>' +
-            '<button data-a="sold" data-id="' + p.id + '" class="btn-o">' + (p.soldOut ? 'В наявності' : 'Sold out') + '</button>' +
-            '<button data-a="del" data-id="' + p.id + '" class="btn-o text-red-600 !border-red-300">Видалити</button></div></div>';
-    }).join('') || '<p class="text-sm text-gray-400">Товарів ще немає</p>';
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+    ({ products: renderProducts, orders: renderOrders, settings: renderSettings, log: renderLog })[tab]();
 }
 
+function chips(arr, key) {
+    return arr.map((v, i) => '<span class="bg-gray-100 px-3 py-1 text-xs"><button data-rn="' + key + '" data-i="' + i + '" title="Перейменувати" class="hover:underline">' + esc(v) + '</button> <button data-k="' + key + '" data-i="' + i + '" class="ml-1 text-gray-400 hover:text-red-600">×</button></span>').join('');
+}
+
+function renderProducts() {
+    $('view').innerHTML =
+        '<div class="flex justify-between items-center mb-4"><h2 class="font-semibold">Товари (' + P.length + ')</h2><button id="add-btn" class="btn">+ Додати товар</button></div>' +
+        '<div class="grid sm:grid-cols-2 gap-4 mb-6">' +
+        '<div class="bg-white border p-4"><p class="lbl !mt-0">Категорії</p><div class="flex flex-wrap gap-2 mb-3">' + chips(D.categories, 'categories') + '</div><div class="flex gap-2"><input id="new-cat" class="inp" placeholder="Нова категорія"><button data-add="categories" data-in="new-cat" class="btn-o">+</button></div></div>' +
+        '<div class="bg-white border p-4"><p class="lbl !mt-0">Бренди</p><div class="flex flex-wrap gap-2 mb-3">' + chips(D.brands, 'brands') + '</div><div class="flex gap-2"><input id="new-brand" class="inp" placeholder="Новий бренд"><button data-add="brands" data-in="new-brand" class="btn-o">+</button></div></div></div>' +
+        '<div class="space-y-2">' + (P.map(p => {
+            const sold = isSold(p);
+            const sizes = Object.entries(p.stock || {}).map(([k, v]) => '<span class="' + (v > 0 ? 'text-black' : 'text-gray-300 line-through') + '">' + (k === 'ONE' ? '' : k + ':') + v + '</span>').join(' · ');
+            return '<div class="bg-white border p-3 flex gap-3 items-center">' +
+                '<img src="' + esc((p.images || [])[0] || '') + '" class="w-14 h-[68px] object-cover bg-gray-100">' +
+                '<div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">' + esc(fullName(p)) + '</p>' +
+                '<p class="text-xs text-gray-500">' + esc(p.category) + ' · ' + esc(p.brand) + '</p>' +
+                '<p class="text-xs mt-1">' + (p.discount > 0 ? '<b>' + fmt(finalPrice(p)) + '</b> <s class="text-gray-400">' + fmt(p.price) + '</s> <span class="text-red-600">-' + Math.round(p.discount) + '%</span>' : '<b>' + fmt(p.price) + '</b>') +
+                (sold ? ' <span class="bg-black text-white px-1.5 py-0.5 text-[10px] uppercase">Sold out</span>' : '') + '</p>' +
+                '<p class="text-[11px] mt-1">' + sizes + '</p></div>' +
+                '<div class="flex flex-col gap-1">' +
+                '<button data-a="edit" data-id="' + p.id + '" class="btn-o">Змінити</button>' +
+                '<button data-a="sold" data-id="' + p.id + '" class="btn-o">' + (p.sold_out ? 'В продаж' : 'Sold out') + '</button>' +
+                '<button data-a="del" data-id="' + p.id + '" class="btn-o text-red-600 !border-red-300">Видалити</button></div></div>';
+        }).join('') || '<p class="text-sm text-gray-400">Товарів ще немає</p>') + '</div>';
+}
+
+const ST = { new: ['Нове', 'bg-yellow-100 text-yellow-800'], paid: ['Оплачено', 'bg-green-100 text-green-800'], shipped: ['Відправлено', 'bg-blue-100 text-blue-800'], done: ['Виконано', 'bg-gray-200 text-gray-700'], returning: ['Повертається', 'bg-orange-100 text-orange-800'], returned: ['Повернуто на склад', 'bg-gray-100 text-gray-500'], cancelled: ['Скасовано', 'bg-red-100 text-red-700'] };
+const NEXT = { new: [['paid', 'Оплачено'], ['cancelled', 'Скасувати']], paid: [['shipped', 'Відправлено'], ['cancelled', 'Скасувати']], shipped: [['done', 'Виконано'], ['returning', 'Повертається']], done: [['returning', 'Повернення']], returning: [['returned', 'Повернуто на склад']], cancelled: [], returned: [] };
+
+function renderOrders() {
+    const list = O.filter(o => oFilter === 'all' || o.status === oFilter);
+    $('view').innerHTML =
+        '<div class="flex flex-wrap gap-2 mb-4 items-center"><button data-of="all" class="btn-o ' + (oFilter === 'all' ? '!bg-black !text-white' : '') + '">Усі</button>' +
+        Object.keys(ST).map(k => '<button data-of="' + k + '" class="btn-o ' + (oFilter === k ? '!bg-black !text-white' : '') + '">' + ST[k][0] + '</button>').join('') +
+        '<button id="refresh" class="btn-o ml-auto">Оновити</button></div>' +
+        '<div class="space-y-3">' + (list.map(o => {
+            const items = (o.items || []).map(i => '<div class="flex items-center gap-2"><img src="' + esc(i.image) + '" class="w-8 h-10 object-cover bg-gray-100"><span class="text-xs">' + esc(i.name) + (i.size ? ' (' + esc(i.size) + ')' : '') + ' × ' + i.qty + ' — ' + fmt(i.price * i.qty) + '</span></div>').join('');
+            return '<div class="bg-white border p-4"><div class="flex justify-between items-start gap-2"><div><p class="font-semibold text-sm">№' + o.id + ' · ' + new Date(o.created_at).toLocaleString('uk-UA') + '</p>' +
+                '<p class="text-sm mt-1">' + esc(o.name) + ' · <a class="underline" href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></p>' +
+                '<p class="text-xs text-gray-500">' + esc(o.city) + ', ' + esc(o.branch) + '</p></div>' +
+                '<span class="text-[11px] px-2 py-1 ' + ST[o.status][1] + '">' + ST[o.status][0] + '</span></div>' +
+                '<div class="space-y-1 my-3">' + items + '</div>' +
+                '<p class="text-sm">Сума: <b>' + fmt(o.total) + '</b> · ' + (o.pay_method === 'full' ? 'повна оплата' : 'передоплата ' + fmt(o.prepay) + ', решта ' + fmt(o.total - o.prepay) + ' при отриманні') + (o.paid > 0 ? ' · <span class="text-green-700">сплачено ' + fmt(o.paid) + '</span>' : '') + '</p>' +
+                (o.comment ? '<p class="text-xs text-gray-500 mt-1">Коментар: ' + esc(o.comment) + '</p>' : '') +
+                (o.ttn ? '<p class="text-xs mt-1">ТТН: <b>' + esc(o.ttn) + '</b></p>' : '') +
+                (o.stock_returned ? '<p class="text-[11px] text-gray-400 mt-1">Залишок повернуто на склад</p>' : '') +
+                '<div class="flex flex-wrap gap-2 mt-3">' + NEXT[o.status].map(([s, l]) => '<button data-os="' + s + '" data-oid="' + o.id + '" class="btn-o">' + l + '</button>').join('') + '</div></div>';
+        }).join('') || '<p class="text-sm text-gray-400">Замовлень немає</p>') + '</div>';
+}
+
+const FIELDS = [
+    ['store_name', 'Назва магазину', 'text'], ['prepay_amount', 'Сума передоплати (₴, 0 = без передоплати)', 'number'],
+    ['payment_details', 'Реквізити для оплати (показуються покупцю після замовлення)', 'area'],
+    ['contact_email', 'Email', 'text'], ['contact_phone', 'Телефон', 'text'], ['contact_telegram', 'Telegram (@нік або посилання)', 'text'],
+    ['contact_instagram', 'Instagram (@нік або посилання)', 'text'], ['contact_tiktok', 'TikTok (@нік або посилання)', 'text'], ['work_hours', 'Години роботи', 'text'],
+    ['fop_name', 'ПІБ ФОП', 'text'], ['fop_id', 'РНОКПП', 'text'], ['fop_address', 'Адреса ФОП', 'text'],
+    ['ship_days', 'Термін відправлення (робочих днів)', 'text'], ['return_days', 'Днів на повернення', 'number'],
+    ['prepay_note', 'Умови передоплати при відмові (у документах)', 'area'], ['return_shipping_note', 'Хто платить за зворотну доставку (у документах)', 'area'],
+    ['dev_credit', 'Підпис «Developed by…» (порожньо = не показувати)', 'text']];
+
+async function renderSettings() {
+    $('view').innerHTML = '<div class="bg-white border p-5"><h2 class="font-semibold mb-2">Налаштування магазину</h2>' +
+        FIELDS.map(([k, l, t]) => '<label class="lbl">' + l + '</label>' + (t === 'area' ? '<textarea id="s-' + k + '" rows="3" class="inp">' + esc(S[k]) + '</textarea>' : '<input id="s-' + k + '" type="' + t + '" class="inp" value="' + esc(S[k]) + '">')).join('') +
+        '<button id="save-settings" class="btn mt-5">Зберегти налаштування</button></div>' +
+        '<div class="bg-white border p-5 mt-5"><h2 class="font-semibold mb-1">Telegram-повідомлення про замовлення</h2>' +
+        '<p class="text-xs text-gray-500">Створи бота в @BotFather, отримаєш токен. Напиши боту будь-що, а свій chat id дізнайся в @userinfobot. Значення зберігаються на сервері й тут більше не показуються.</p>' +
+        '<p id="tg-state" class="text-xs mt-2"></p>' +
+        '<label class="lbl">Токен бота</label><input id="tg-token" type="password" class="inp" placeholder="123456:ABC...">' +
+        '<label class="lbl">Chat id</label><input id="tg-chat" class="inp" placeholder="123456789">' +
+        '<div class="flex gap-2 mt-4"><button id="save-tg" class="btn">Зберегти</button><button id="test-tg" class="btn-o">Надіслати тест</button></div></div>';
+    try {
+        const a = await sb.rpc('secret_exists', { k: 'telegram_token' }), b = await sb.rpc('secret_exists', { k: 'telegram_chat' });
+        $('tg-state').textContent = a.data && b.data ? '✅ Telegram налаштовано' : '⚠️ Telegram ще не налаштовано';
+    } catch (e) { }
+}
+
+async function renderLog() {
+    LOG = await must(sb.from('stock_log').select('*').order('id', { ascending: false }).limit(150));
+    $('view').innerHTML = '<h2 class="font-semibold mb-3">Журнал залишків</h2><div class="bg-white border divide-y">' +
+        (LOG.map(l => '<div class="px-4 py-2 text-xs flex justify-between gap-3"><span>' + new Date(l.created_at).toLocaleString('uk-UA') + ' · ' + esc(l.product_name) + (l.size && l.size !== 'ONE' ? ' (' + esc(l.size) + ')' : '') + '</span>' +
+            '<span class="whitespace-nowrap"><b class="' + (l.delta > 0 ? 'text-green-700' : 'text-red-600') + '">' + (l.delta > 0 ? '+' : '') + l.delta + '</b> · ' + esc(l.reason) + (l.order_id ? ' №' + l.order_id : '') + '</span></div>').join('') || '<p class="p-4 text-xs text-gray-400">Порожньо</p>') + '</div>';
+}
+
+// ---------- дії ----------
 document.addEventListener('click', async e => {
+    const t = e.target.closest('.tab');
+    if (t) { tab = t.dataset.tab; if (tab === 'orders') await loadOrders(); render(); return; }
+    if (e.target.closest('#add-btn')) return openForm(null);
+    if (e.target.closest('#refresh')) { await loadOrders(); render(); return; }
+    const of = e.target.closest('[data-of]'); if (of) { oFilter = of.dataset.of; render(); return; }
+
+    const add = e.target.closest('[data-add]');
+    if (add) {
+        const v = $(add.dataset.in).value.trim();
+        if (!v || D[add.dataset.add].includes(v)) return;
+        D[add.dataset.add].push(v); await saveMeta(); toast('Збережено ✓'); render(); return;
+    }
     const rn = e.target.closest('[data-rn]');
     if (rn) {
         const key = rn.dataset.rn, i = +rn.dataset.i, old = D[key][i];
         const nv = (prompt('Нова назва для «' + old + '»:', old) || '').trim();
         if (!nv || nv === old || D[key].includes(nv)) return;
-        D[key][i] = nv;
-        const f = key === 'brands' ? 'brand' : 'category';
-        D.products.forEach(p => { if (p[f] === old) p[f] = nv; });
-        render(); save(); return;
+        D[key][i] = nv; await saveMeta();
+        await must(sb.from('products').update({ [key === 'brands' ? 'brand' : 'category']: nv }).eq(key === 'brands' ? 'brand' : 'category', old));
+        await loadCore(); toast('Збережено ✓'); render(); return;
     }
-    const c = e.target.closest('[data-k]');
-    if (c) {
-        const arr = D[c.dataset.k], v = arr[c.dataset.i];
-        const used = D.products.some(p => p[c.dataset.k === 'brands' ? 'brand' : 'category'] === v);
-        if (used) return toast('Спочатку зміни товари з «' + v + '»');
-        arr.splice(c.dataset.i, 1); render(); save(); return;
+    const k = e.target.closest('[data-k]');
+    if (k) {
+        const arr = D[k.dataset.k], v = arr[k.dataset.i];
+        if (P.some(p => p[k.dataset.k === 'brands' ? 'brand' : 'category'] === v)) return toast('Спочатку зміни товари з «' + v + '»');
+        arr.splice(k.dataset.i, 1); await saveMeta(); render(); return;
     }
     const b = e.target.closest('[data-a]');
-    if (!b) return;
-    const p = D.products.find(x => x.id === b.dataset.id);
-    if (b.dataset.a === 'edit') openForm(p);
-    if (b.dataset.a === 'sold') { p.soldOut = !p.soldOut; render(); save(); }
-    if (b.dataset.a === 'del' && confirm('Видалити «' + fullName(p) + '»?')) { D.products = D.products.filter(x => x !== p); render(); save(); }
+    if (b) {
+        const p = P.find(x => x.id === b.dataset.id);
+        if (b.dataset.a === 'edit') openForm(p);
+        if (b.dataset.a === 'sold') { await must(sb.from('products').update({ sold_out: !p.sold_out }).eq('id', p.id)); await loadCore(); render(); }
+        if (b.dataset.a === 'del' && confirm('Видалити «' + fullName(p) + '»?')) { await must(sb.from('products').delete().eq('id', p.id)); await loadCore(); render(); }
+        return;
+    }
+    const os = e.target.closest('[data-os]');
+    if (os) {
+        const id = +os.dataset.oid, st = os.dataset.os;
+        if (st === 'returned' && !confirm('Підтверджуєш, що товар повернувся й перевірений? Залишок збільшиться.')) return;
+        if (st === 'cancelled' && !confirm('Скасувати замовлення?')) return;
+        if (st === 'shipped') { const ttn = prompt('Номер ТТН (можна залишити порожнім):', ''); if (ttn === null) return; if (ttn.trim()) await must(sb.from('orders').update({ ttn: ttn.trim() }).eq('id', id)); }
+        await must(sb.rpc('set_order_status', { p_id: id, p_status: st }));
+        await loadOrders(); await loadCore(); toast('Збережено ✓'); render(); return;
+    }
+    if (e.target.closest('#save-settings')) {
+        await must(sb.from('settings').upsert(FIELDS.map(([k]) => ({ key: k, value: $('s-' + k).value.trim() }))));
+        FIELDS.forEach(([k]) => S[k] = $('s-' + k).value.trim()); toast('Збережено ✓'); return;
+    }
+    if (e.target.closest('#save-tg')) {
+        if ($('tg-token').value.trim()) await must(sb.rpc('set_secret', { k: 'telegram_token', v: $('tg-token').value.trim() }));
+        if ($('tg-chat').value.trim()) await must(sb.rpc('set_secret', { k: 'telegram_chat', v: $('tg-chat').value.trim() }));
+        $('tg-token').value = ''; $('tg-chat').value = ''; toast('Збережено ✓'); renderSettings(); return;
+    }
+    if (e.target.closest('#test-tg')) {
+        const r = await sb.rpc('test_telegram');
+        toast(r.error ? 'Не вдалось: ' + r.error.message : 'Тест відправлено — перевір Telegram'); return;
+    }
+    const ri = e.target.closest('[data-ri]');
+    if (ri) { imgs.splice(+ri.dataset.ri, 1); drawImgs(); return; }
+    const mi = e.target.closest('[data-mi]');
+    if (mi) { const [x] = imgs.splice(+mi.dataset.mi, 1); imgs.unshift(x); drawImgs(); }
 });
 
-function addTo(inputId, key) {
-    const v = $(inputId).value.trim();
-    if (!v || D[key].includes(v)) return;
-    D[key].push(v); $(inputId).value = ''; render(); save();
-}
-$('add-cat').onclick = () => addTo('new-cat', 'categories');
-$('add-brand').onclick = () => addTo('new-brand', 'brands');
-
-// ---- форма ----
-function openForm(p) {
-    editId = p ? p.id : null; img = p ? p.image : '';
-    $('form-title').textContent = p ? 'Редагувати товар' : 'Новий товар';
-    $('f-name').value = p?.name || ''; $('f-desc').value = p?.description || '';
-    $('f-price').value = p?.price ?? ''; $('f-discount').value = p?.discount ? +(+p.discount).toFixed(2) : '';
-    $('f-sold').checked = !!p?.soldOut; $('f-file').value = '';
-    $('f-cat').innerHTML = D.categories.map(c => '<option>' + esc(c) + '</option>').join('');
-    $('f-brand').innerHTML = D.brands.map(c => '<option>' + esc(c) + '</option>').join('');
-    if (p) { $('f-cat').value = p.category; $('f-brand').value = p.brand; }
-    $('f-sizes').innerHTML = SIZES.map(s => {
-        const v = p && s in (p.sizes || {}) ? (p.sizes[s] ? 'in' : 'out') : (p ? '' : 'in');
-        return '<div><p class="text-xs text-center mb-1">' + s + '</p><select data-s="' + s + '" class="inp !px-1 text-xs">' +
-            ['', 'in', 'out'].map(o => '<option value="' + o + '"' + (o === v ? ' selected' : '') + '>' + { '': '—', in: 'Є', out: 'Нема' }[o] + '</option>').join('') + '</select></div>';
-    }).join('');
-    preview(); $('modal').classList.remove('hidden');
+// ---------- форма товару ----------
+function drawImgs() {
+    $('f-imgs').innerHTML = imgs.map((u, i) => '<div class="relative"><img src="' + esc(u) + '" class="w-20 h-24 object-cover bg-gray-100 ' + (i === 0 ? 'ring-2 ring-black' : '') + '">' +
+        '<button data-ri="' + i + '" class="absolute top-0 right-0 bg-black text-white w-5 h-5 text-xs">×</button>' +
+        (i > 0 ? '<button data-mi="' + i + '" class="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px]">головне</button>' : '') + '</div>').join('');
 }
 function preview() {
     const nm = $('f-name').value.trim();
     $('f-fullname').textContent = nm ? 'На сайті буде: ' + fullName({ name: nm, category: $('f-cat').value }) : '';
-    const e = $('f-preview'); e.src = imgCache[img] || img; e.classList.toggle('hidden', !img);
     const pr = +$('f-price').value, d = +$('f-discount').value || 0;
     $('f-final').textContent = pr && d > 0 ? 'Ціна на сайті: ' + fmt(Math.round(pr * (1 - d / 100))) + ' (було ' + fmt(pr) + ')' : '';
 }
+function openForm(p) {
+    editId = p ? p.id : null; imgs = p ? [...(p.images || [])] : [];
+    $('form-title').textContent = p ? 'Редагувати товар' : 'Новий товар';
+    $('f-name').value = p?.name || ''; $('f-desc').value = p?.description || '';
+    $('f-price').value = p?.price ?? ''; $('f-discount').value = p?.discount ? +(+p.discount).toFixed(2) : '';
+    $('f-sold').checked = !!p?.sold_out; $('f-file').value = '';
+    $('f-cat').innerHTML = D.categories.map(c => '<option>' + esc(c) + '</option>').join('');
+    $('f-brand').innerHTML = D.brands.map(c => '<option>' + esc(c) + '</option>').join('');
+    if (p) { $('f-cat').value = p.category; $('f-brand').value = p.brand; }
+    const st = p?.stock || {};
+    $('f-stock').innerHTML = SIZES.map(s => '<div><p class="text-xs text-center mb-1">' + s + '</p><input id="st-' + s + '" type="number" min="0" class="inp !px-1 text-center" value="' + (s in st ? st[s] : '') + '"></div>').join('');
+    $('st-ONE').value = 'ONE' in st ? st.ONE : '';
+    drawImgs(); preview(); $('modal').classList.remove('hidden');
+}
 $('f-price').oninput = $('f-discount').oninput = $('f-name').oninput = $('f-cat').onchange = preview;
-$('add-btn').onclick = () => openForm(null);
 $('close-form').onclick = () => $('modal').classList.add('hidden');
 
-$('f-file').onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-        const im = new Image();
-        im.onload = () => { // стискаємо до 1000px, щоб сайт не гальмував
-            const k = Math.min(1, 1000 / Math.max(im.width, im.height)), cv = document.createElement('canvas');
-            cv.width = im.width * k; cv.height = im.height * k;
-            const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
-            img = cv.toDataURL('image/jpeg', 0.85); preview();
-        };
-        im.src = r.result;
-    };
-    r.readAsDataURL(f);
+$('f-file').onchange = async e => {
+    for (const f of e.target.files) {
+        const data = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
+        const im = await new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.src = data; });
+        const k = Math.min(1, 1000 / Math.max(im.width, im.height)), cv = document.createElement('canvas');
+        cv.width = im.width * k; cv.height = im.height * k;
+        const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+        imgs.push(cv.toDataURL('image/jpeg', 0.85));
+    }
+    e.target.value = ''; drawImgs();
 };
+
+async function upload(dataUrl) {
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
+    const { error } = await sb.storage.from('images').upload(path, blob, { contentType: 'image/jpeg' });
+    if (error) throw new Error('Фото не завантажилось: ' + error.message);
+    return sb.storage.from('images').getPublicUrl(path).data.publicUrl;
+}
 
 $('save-btn').onclick = async () => {
     const name = $('f-name').value.trim(), price = +$('f-price').value;
     if (!name || !price) return toast('Вкажи назву і ціну');
-    if (!img) return toast('Додай фото');
-    const sizes = {};
-    document.querySelectorAll('#f-sizes select').forEach(s => { if (s.value) sizes[s.dataset.s] = s.value === 'in'; });
-    let image = img;
-    if (img.startsWith('data:')) {
-        toast('Завантажую фото…');
-        try { image = await uploadImage(img); } catch (e) { return toast(e.message); }
+    if (!imgs.length) return toast('Додай хоча б одне фото');
+    const stock = {};
+    SIZES.forEach(s => { const v = $('st-' + s).value; if (v !== '') stock[s] = Math.max(0, parseInt(v) || 0); });
+    if (!Object.keys(stock).length) {
+        if ($('st-ONE').value === '') return toast('Вкажи кількість по розмірах або загальну кількість');
+        stock.ONE = Math.max(0, parseInt($('st-ONE').value) || 0);
     }
-    const p = {
-        id: editId || crypto.randomUUID(), name, description: $('f-desc').value.trim(), price,
-        discount: Math.min(99, Math.max(0, +$('f-discount').value || 0)), category: $('f-cat').value, brand: $('f-brand').value,
-        image, sizes, soldOut: $('f-sold').checked
-    };
-    if (editId) D.products[D.products.findIndex(x => x.id === editId)] = p; else D.products.unshift(p);
-    if (await save()) { $('modal').classList.add('hidden'); render(); }
+    $('save-btn').disabled = true; toast('Зберігаю…');
+    try {
+        const images = [];
+        for (const u of imgs) images.push(u.startsWith('data:') ? await upload(u) : u);
+        const row = {
+            name, description: $('f-desc').value.trim(), price, discount: Math.min(99, Math.max(0, +$('f-discount').value || 0)),
+            category: $('f-cat').value, brand: $('f-brand').value, images, stock, sold_out: $('f-sold').checked
+        };
+        if (editId) {
+            const old = P.find(x => x.id === editId);
+            await must(sb.from('products').update(row).eq('id', editId));
+            // ручні зміни залишку — у журнал
+            const logs = [];
+            new Set([...Object.keys(old.stock || {}), ...Object.keys(stock)]).forEach(k => {
+                const d = (stock[k] || 0) - ((old.stock || {})[k] || 0);
+                if (d) logs.push({ product_id: editId, product_name: name, size: k, delta: d, reason: 'ручна зміна' });
+            });
+            if (logs.length) await sb.from('stock_log').insert(logs);
+        } else {
+            const [created] = await must(sb.from('products').insert(row).select('id'));
+            const logs = Object.entries(stock).filter(([, v]) => v > 0).map(([k, v]) => ({ product_id: created.id, product_name: name, size: k, delta: v, reason: 'новий товар' }));
+            if (logs.length) await sb.from('stock_log').insert(logs);
+        }
+        await loadCore(); $('modal').classList.add('hidden'); toast('Збережено ✓'); render();
+    } catch (e) { toast(e.message || 'Помилка'); }
+    $('save-btn').disabled = false;
 };
 
 sb.auth.getSession().then(({ data }) => { if (data.session) start().catch(e => { $('login-err').textContent = e.message; $('login-err').classList.remove('hidden'); }); });

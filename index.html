@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Mobile Header</title>
+    <title>Магазин</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -120,9 +120,7 @@
 
         <!-- VIEW ALL BUTTON -->
         <div id="view-all-container" class="mt-10 flex justify-center pure-white-bg">
-            <button id="view-all-btn" class="border border-black px-8 py-3 text-xs uppercase tracking-wider font-medium hover:bg-black hover:text-white transition-colors bg-white">
-                View all
-            </button>
+            <button id="view-all-btn" class="border border-black px-8 py-3 text-xs uppercase tracking-wider font-medium hover:bg-black hover:text-white transition-colors bg-white">Показати всі</button>
         </div>
 
         <!-- FOOTER SECTION -->
@@ -146,11 +144,7 @@
             </div>
 
             <!-- Footer Links & Copyright -->
-            <div class="text-[11px] text-gray-500 space-y-1.5 pt-2 pure-white-bg">
-                <p><a href="#" class="hover:underline">Terms and Policies</a></p>
-                <p>Copyright © 2026 999yessirskiii</p>
-                <p>Developed by <a href="#" class="underline hover:text-black">Kosiak Production</a></p>
-            </div>
+            <div class="site-foot text-[11px] text-gray-500 space-y-1.5 pt-2"></div>
         </section>
 
     </main>
@@ -177,7 +171,7 @@
                 <!-- Item 1: Expandable CLOTHING CATEGORIES -->
                 <div class="border-b border-gray-100 pb-5">
                     <button id="categories-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>CLOTHING CATEGORIES</span>
+                        <span>КАТЕГОРІЇ</span>
                         <svg id="categories-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
@@ -189,7 +183,7 @@
                 <!-- Item 2: Expandable BRANDS -->
                 <div class="border-b border-gray-100 pb-5">
                     <button id="brands-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>BRANDS</span>
+                        <span>БРЕНДИ</span>
                         <svg id="brands-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
@@ -201,7 +195,7 @@
                 <!-- Item 3: CONTACTS -->
                 <div class="border-b border-gray-100 pb-5">
                     <button id="contacts-toggle" class="w-full flex justify-between items-center text-left py-1 hover:text-gray-500 transition-colors focus:outline-none">
-                        <span>CONTACTS</span>
+                        <span>КОНТАКТИ</span>
                         <svg id="contacts-arrow" class="w-4 h-4 transform transition-transform duration-200 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
@@ -228,7 +222,7 @@
             <!-- Menu Footer Info -->
             <div class="p-6 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-normal tracking-wide">
                 <span>UAH (₴)</span>
-                <span>CUSTOMER CARE</span>
+                <span>ПІДТРИМКА</span>
             </div>
         </div>
     </div>
@@ -241,15 +235,15 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input id="search-input" type="text" placeholder="Search items, brands, categories..." class="bg-transparent w-full text-xs tracking-wider focus:outline-none placeholder-gray-400">
+                <input id="search-input" type="text" placeholder="Пошук: товар, бренд, категорія..." class="bg-transparent w-full text-xs tracking-wider focus:outline-none placeholder-gray-400">
             </div>
-            <button id="search-close" class="ml-4 text-xs tracking-widest font-semibold uppercase hover:opacity-60 transition-opacity">CANCEL</button>
+            <button id="search-close" class="ml-4 text-xs tracking-widest font-semibold uppercase hover:opacity-60 transition-opacity">СКАСУВАТИ</button>
         </div>
         
         <!-- Search body -->
         <div class="max-w-md mx-auto w-full p-6 flex-1 overflow-y-auto">
             <div id="search-suggest" class="space-y-4">
-                <p class="text-[10px] font-semibold text-gray-400 tracking-widest uppercase">POPULAR SEARCHES</p>
+                <p class="text-[10px] font-semibold text-gray-400 tracking-widest uppercase">ПОПУЛЯРНІ ЗАПИТИ</p>
                 <div id="search-chips" class="flex flex-wrap gap-2 text-xs"></div>
             </div>
             <div id="search-results" class="space-y-4 hidden"></div>
@@ -262,7 +256,7 @@
         <div id="cart-panel" class="absolute inset-y-0 right-0 max-w-[340px] w-full bg-white shadow-2xl transform translate-x-full drawer-panel flex flex-col">
             
             <div class="p-6 flex items-center justify-between border-b border-gray-100">
-                <span id="cart-title" class="font-semibold tracking-wider text-xs uppercase">YOUR BAG (0)</span>
+                <span id="cart-title" class="font-semibold tracking-wider text-xs uppercase">КОШИК (0)</span>
                 <button id="cart-close" aria-label="Close Cart" class="p-2 -mr-2 text-black hover:opacity-60 transition-opacity">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -277,12 +271,12 @@
             <!-- Cart Checkout Area -->
             <div class="p-6 border-t border-gray-100 space-y-4">
                 <div class="flex justify-between text-xs font-semibold tracking-wider uppercase">
-                    <span>SUBTOTAL</span>
+                    <span>РАЗОМ</span>
                     <span id="cart-total">0 ₴</span>
                 </div>
-                <p class="text-[10px] text-gray-400">Taxes and shipping calculated at checkout.</p>
-                <button class="w-full bg-black text-white py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase hover:bg-gray-800 transition-colors">CHECKOUT</button>
-                <button id="cart-continue" class="w-full text-center text-xs tracking-wider uppercase text-gray-400 hover:text-black transition-colors pt-1">CONTINUE SHOPPING</button>
+                <p class="text-[10px] text-gray-400">Доставку «Новою поштою» оплачує покупець за тарифами перевізника.</p>
+                <button id="cart-checkout" class="w-full bg-black text-white py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase hover:bg-gray-800 transition-colors">ОФОРМИТИ ЗАМОВЛЕННЯ</button>
+                <button id="cart-continue" class="w-full text-center text-xs tracking-wider uppercase text-gray-400 hover:text-black transition-colors pt-1">ПРОДОВЖИТИ ПОКУПКИ</button>
             </div>
         </div>
     </div>
@@ -315,41 +309,36 @@
         </header>
 
         <!-- Фото -->
-        <div class="px-2 pt-4">
-            <img id="pp-img" src="" alt="" class="w-full aspect-[4/4.2] object-cover bg-white product-img">
-        </div>
+        <div class="px-2 pt-4"><div id="pp-gallery" class="pp-scroll" style="gap:0"></div><div id="pp-dots" class="flex justify-center gap-1.5 mt-3"></div></div>
 
         <!-- Назва, ціна, розміри -->
         <section class="px-5 pt-8 text-center">
             <h1 id="pp-title" class="text-[34px] leading-[1.1] font-normal"></h1>
             <div id="pp-price" class="text-xl mt-6 space-x-2"></div>
-            <p class="text-[13px] mt-6 mb-2">Size</p>
+            <p class="text-[13px] mt-6 mb-2">Розмір</p>
             <div id="pp-sizes" class="grid grid-cols-4 gap-2"></div>
+            <p id="pp-left" class="text-[11px] text-gray-500 mt-2 h-4"></p>
             <button id="pp-add" class="w-full bg-black text-white h-12 mt-3 flex items-center justify-center space-x-2 text-sm">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span id="pp-add-text">Add to cart</span>
+                <span id="pp-add-text">Додати в кошик</span>
             </button>
         </section>
 
         <!-- Таби -->
         <section class="px-4 mt-10">
             <div class="flex text-center">
-                <button class="pp-tab active" data-tab="desc">Description</button>
-                <button class="pp-tab" data-tab="ship">Shipping</button>
-                <button class="pp-tab" data-tab="ret">Return</button>
+                <button class="pp-tab active" data-tab="desc">Опис</button>
+                <button class="pp-tab" data-tab="ship">Доставка</button>
+                <button class="pp-tab" data-tab="ret">Повернення</button>
             </div>
             <div id="tab-desc" class="pp-panel text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
-            <div id="tab-ship" class="pp-panel hidden text-[13px] text-[#333] space-y-3 pt-5">
-                <p>Shipping across Ukraine 1–3 business days.</p><p>Free shipping on orders over 3,000 ₴.</p>
-            </div>
-            <div id="tab-ret" class="pp-panel hidden text-[13px] text-[#333] space-y-3 pt-5">
-                <p>Returns accepted within 14 days if the item is unworn and has tags.</p>
-            </div>
+            <div id="tab-ship" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
+            <div id="tab-ret" class="pp-panel hidden text-[13px] text-[#333] whitespace-pre-line pt-5"></div>
         </section>
 
         <!-- You may like it -->
         <section class="mt-14 pl-4">
-            <h2 class="text-[32px] font-normal mb-6">You may like it</h2>
+            <h2 class="text-[32px] font-normal mb-6">Вам може сподобатись</h2>
             <div id="pp-related" class="pp-scroll pr-4"></div>
         </section>
 
@@ -363,14 +352,37 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
                 </a>
             </div>
-            <div class="text-[11px] text-gray-500 space-y-1.5">
-                <p><a href="#" class="hover:underline">Terms and Policies</a></p>
-                <p>Copyright © 2026 999yessirskiii</p>
-                <p>Developed by <a href="#" class="underline hover:text-black">Kosiak Production</a></p>
-            </div>
+            <div class="site-foot text-[11px] text-gray-500 space-y-1.5 pt-2"></div>
         </section>
     </div>
 </div>
+
+    <div id="checkout" class="fixed inset-0 z-[55] bg-white overflow-y-auto" style="display:none">
+        <div class="max-w-md mx-auto px-5 py-6">
+            <div id="co-form">
+                <div class="flex items-center justify-between mb-6">
+                    <button id="co-back" class="text-[11px] tracking-widest uppercase text-gray-500">← Кошик</button>
+                    <button id="co-close" class="text-2xl leading-none" aria-label="Закрити">&times;</button>
+                </div>
+                <h2 class="text-sm font-semibold tracking-widest uppercase mb-4">Оформлення замовлення</h2>
+                <div id="co-summary" class="space-y-2 text-xs mb-6"></div>
+                <input id="co-name" class="border border-gray-200 px-3 py-3 text-sm w-full focus:outline-none focus:border-black mb-3" placeholder="Ім'я та прізвище" autocomplete="name">
+                <input id="co-phone" type="tel" class="border border-gray-200 px-3 py-3 text-sm w-full focus:outline-none focus:border-black mb-3" placeholder="Телефон" autocomplete="tel">
+                <input id="co-city" class="border border-gray-200 px-3 py-3 text-sm w-full focus:outline-none focus:border-black mb-3" placeholder="Місто" autocomplete="address-level2">
+                <input id="co-branch" class="border border-gray-200 px-3 py-3 text-sm w-full focus:outline-none focus:border-black mb-3" placeholder="Відділення або поштомат «Нової пошти» (номер)">
+                <textarea id="co-comment" rows="2" class="border border-gray-200 px-3 py-3 text-sm w-full focus:outline-none focus:border-black mb-3" placeholder="Коментар (необов'язково)"></textarea>
+                <p class="text-[10px] font-semibold text-gray-400 tracking-widest uppercase mb-2">Оплата</p>
+                <div id="co-pay" class="mb-4"></div>
+                <p id="co-err" class="text-red-600 text-xs mb-3 hidden"></p>
+                <button id="co-submit" class="w-full bg-black text-white py-3.5 text-xs tracking-widest uppercase">Підтвердити замовлення</button>
+                <p class="text-[10px] text-gray-400 mt-3">Оформлюючи замовлення, ви погоджуєтесь з <a class="underline" href="legal.html?doc=offer">публічною офертою</a> та <a class="underline" href="legal.html?doc=privacy">політикою конфіденційності</a>.</p>
+            </div>
+            <div id="co-done" class="hidden text-center py-12 space-y-4">
+                <div id="co-done-text" class="space-y-4"></div>
+                <button id="co-finish" class="border border-black px-8 py-3 text-xs uppercase tracking-wider mt-4">Продовжити покупки</button>
+            </div>
+        </div>
+    </div>
 
     <!-- JAVASCRIPT CONTROLLERS -->
     <script>
@@ -469,39 +481,44 @@
         cartContinue.addEventListener('click', closeCart);
         cartBackdrop.addEventListener('click', closeCart);
 
-    // ---------- ДАНІ З SUPABASE + СТОРІНКИ + ПОШУК + КОШИК ----------
+    // ---------- ДАНІ З SUPABASE + ПОШУК + КОШИК + ЗАМОВЛЕННЯ ----------
     const ppEl = document.getElementById('product-page');
     const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
     const fmt = n => Number(n).toLocaleString('en-US') + ' ₴';
-    let DATA = { categories: [], brands: [], products: [] }, view = [], filter = null, query = '', ppSize = null, ppCur = null;
+    const $id = id => document.getElementById(id);
+    const API = new URL(SUPABASE_URL.trim()).origin + '/rest/v1/', HDR = { apikey: SUPABASE_ANON_KEY.trim() };
+    let DATA = { categories: [], brands: [], products: [] }, SET = {}, view = [], filter = null, query = '', ppSize = null, ppCur = null;
 
-    // Назва на сайті = назва + категорія (Гучі + Футболка = «Гучі Футболка»)
     const fullName = p => {
         const n = (p.name || '').trim(), c = (p.category || '').trim();
         return c && !n.toLowerCase().includes(c.toLowerCase()) ? n + ' ' + c : n;
     };
     const hasSizes = p => Object.keys(p.sizes || {}).length > 0;
-    const isSold = p => p.soldOut || (hasSizes(p) && !Object.values(p.sizes).some(Boolean));
+    const isSold = p => p.soldOut || Object.values(p.stock || {}).every(q => !(q > 0));
+    const avail = (p, size) => (p.stock || {})[size || 'ONE'] || 0;
     const finalPrice = p => Math.round(p.price * (1 - (p.discount || 0) / 100));
     const priceHtml = p => p.discount > 0
         ? '<span class="text-black font-semibold">' + fmt(finalPrice(p)) + '</span> <span class="text-gray-400 line-through text-[11px]">' + fmt(p.price) + '</span>'
         : '<span class="text-black font-semibold">' + fmt(p.price) + '</span>';
-
-    // Пошук: усі слова запиту мають зустрічатись у назві, бренді або категорії
     const matches = (p, q) => {
-        const h = (fullName(p) + ' ' + p.brand + ' ' + p.category).toLowerCase();
+        const h = (fullName(p) + ' ' + (p.brand || '') + ' ' + (p.category || '')).toLowerCase();
         return q.toLowerCase().split(/\s+/).filter(Boolean).every(w => h.includes(w));
     };
+    const normalize = p => {
+        const stock = p.stock || {}, keys = Object.keys(stock).filter(k => k !== 'ONE');
+        return { ...p, image: (p.images && p.images[0]) || '', soldOut: p.sold_out, stock, sizes: Object.fromEntries(keys.map(k => [k, stock[k] > 0])) };
+    };
+    const get = path => fetch(API + path, { headers: HDR, cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
 
     function card(p, i) {
         const sold = isSold(p);
         const badge = sold
-            ? '<span class="absolute top-1.5 right-1.5 bg-black text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase z-10 shadow-sm">Sold out</span>'
+            ? '<span class="absolute top-1.5 right-1.5 bg-black text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase z-10 shadow-sm">Продано</span>'
             : p.discount > 0 ? '<span class="absolute top-1.5 right-1.5 bg-[#b91c1c] text-white text-[10px] font-bold px-2 py-0.5 tracking-wider uppercase z-10 shadow-sm">Sale</span>' : '';
         return '<div data-i="' + i + '" class="' + (i >= 15 ? 'extra-product flex-col' : 'flex flex-col') + ' text-center group cursor-pointer pure-white-bg">' +
             '<div class="relative w-full aspect-[4/4.8] pure-white-bg mb-2 overflow-hidden flex items-center justify-center">' + badge +
-            '<img src="' + esc(p.image) + '" alt="' + esc(fullName(p)) + '" class="w-full h-full object-cover product-img"></div>' +
+            '<img loading="lazy" src="' + esc(p.image) + '" alt="' + esc(fullName(p)) + '" class="w-full h-full object-cover product-img"></div>' +
             '<h3 class="text-[11px] font-semibold tracking-wider uppercase leading-snug mb-1">' + esc(fullName(p)) + '</h3>' +
             '<div class="text-xs font-medium space-x-1">' + priceHtml(p) + '</div></div>';
     }
@@ -510,17 +527,16 @@
         view = DATA.products.filter(p =>
             (!filter || (filter.type === 'sale' ? p.discount > 0 : p[filter.type] === filter.value)) &&
             (!query || matches(p, query)));
-        const grid = document.getElementById('products-grid');
+        const grid = $id('products-grid');
         grid.innerHTML = view.length ? view.map(card).join('') : '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Нічого не знайдено</p>';
         grid.querySelectorAll('[data-i]').forEach(c => c.addEventListener('click', () => openProduct(view[c.dataset.i])));
-        document.getElementById('view-all-container').style.display = view.length > 15 ? 'flex' : 'none';
+        $id('view-all-container').style.display = view.length > 15 ? 'flex' : 'none';
         const t = query ? 'Пошук: ' + query : filter ? (filter.type === 'sale' ? 'Sale' : filter.value) : '';
-        document.getElementById('list-head').classList.toggle('hidden', !t);
-        document.getElementById('list-title').textContent = t;
-        document.getElementById('list-count').textContent = view.length + ' шт.';
+        $id('list-head').classList.toggle('hidden', !t);
+        $id('list-title').textContent = t;
+        $id('list-count').textContent = view.length + ' шт.';
     }
 
-    // «Сторінка» категорії / бренду / результатів пошуку (працює кнопка «назад»)
     function showList(f, q) {
         const wasList = !!(filter || query), wasProduct = ppEl.classList.contains('open');
         closeProduct(true);
@@ -529,15 +545,37 @@
         renderGrid(); window.scrollTo(0, 0);
     }
     function resetList() { filter = null; query = ''; renderGrid(); window.scrollTo(0, 0); }
-    document.getElementById('list-back').addEventListener('click', () => history.state?.list ? history.back() : resetList());
+    $id('list-back').addEventListener('click', () => history.state?.list ? history.back() : resetList());
 
+    // ---------- меню, контакти, підвал ----------
+    const link = (v, base) => /^https?:/i.test(v) ? v : base + v.replace(/^@/, '').replace(/^t\.me\//, '');
     function buildMenus() {
         const a = (t, v, label, cls) => '<a href="#" data-ft="' + t + '" data-fv="' + esc(v) + '" class="block hover:text-black transition-colors ' + (cls || '') + '">' + esc(label).toUpperCase() + '</a>';
-        document.getElementById('categories-submenu').innerHTML = a('all', '', 'All') +
-            DATA.categories.map(c => a('category', c, c)).join('') + a('sale', '', 'Sale', 'text-red-600 font-medium');
-        document.getElementById('brands-submenu').innerHTML = DATA.brands.map(b => a('brand', b, b)).join('');
-        document.getElementById('search-chips').innerHTML = DATA.categories.concat(DATA.brands)
+        $id('categories-submenu').innerHTML = a('all', '', 'Усі товари') + DATA.categories.map(c => a('category', c, c)).join('') + a('sale', '', 'Sale', 'text-red-600 font-medium');
+        $id('brands-submenu').innerHTML = DATA.brands.map(b => a('brand', b, b)).join('');
+        $id('search-chips').innerHTML = DATA.categories.concat(DATA.brands)
             .map(v => '<span class="chip px-3.5 py-2 bg-gray-100 rounded-full cursor-pointer hover:bg-black hover:text-white transition-colors">' + esc(v) + '</span>').join('');
+    }
+    function applySettings() {
+        const s = SET, name = (s.store_name || '').trim();
+        if (name) document.title = name;
+        const rows = [];
+        if (s.contact_email) rows.push(['EMAIL', '<a href="mailto:' + esc(s.contact_email) + '" class="hover:underline">' + esc(s.contact_email) + '</a>']);
+        if (s.contact_phone) rows.push(['ТЕЛ.', '<a href="tel:' + esc(s.contact_phone) + '" class="hover:underline">' + esc(s.contact_phone) + '</a>']);
+        if (s.contact_telegram) rows.push(['TELEGRAM', '<a href="' + esc(link(s.contact_telegram, 'https://t.me/')) + '" target="_blank" class="hover:underline">' + esc(s.contact_telegram) + '</a>']);
+        if (s.contact_instagram) rows.push(['INSTAGRAM', '<a href="' + esc(link(s.contact_instagram, 'https://instagram.com/')) + '" target="_blank" class="hover:underline">' + esc(s.contact_instagram) + '</a>']);
+        $id('contacts-submenu').innerHTML = rows.map(r => '<p class="flex items-center space-x-2"><span class="font-medium text-black uppercase text-[10px]">' + r[0] + ':</span>' + r[1] + '</p>').join('') +
+            (s.work_hours ? '<p class="text-[10px] text-gray-400 uppercase pt-1">' + esc(s.work_hours) + '</p>' : '') || '<p class="text-[10px] text-gray-400">Контакти скоро з\'являться</p>';
+        document.querySelectorAll('a[aria-label="Instagram"]').forEach(x => { if (s.contact_instagram) x.href = link(s.contact_instagram, 'https://instagram.com/'); else x.style.display = 'none'; });
+        document.querySelectorAll('a[aria-label="TikTok"]').forEach(x => { if (s.contact_tiktok) x.href = link(s.contact_tiktok, 'https://tiktok.com/@'); else x.style.display = 'none'; });
+        const L = [['offer', 'Публічна оферта'], ['delivery', 'Доставка й оплата'], ['returns', 'Повернення й обмін'], ['privacy', 'Конфіденційність']];
+        const foot = '<p>' + L.map(l => '<a href="legal.html?doc=' + l[0] + '" class="hover:underline">' + l[1] + '</a>').join(' · ') + '</p>' +
+            '<p>Copyright © ' + new Date().getFullYear() + ' ' + esc(name) + '</p>' +
+            (s.fop_name ? '<p>ФОП ' + esc(s.fop_name) + (s.fop_id ? ', РНОКПП ' + esc(s.fop_id) : '') + '</p>' : '') +
+            (s.dev_credit ? '<p>' + esc(s.dev_credit) + '</p>' : '');
+        document.querySelectorAll('.site-foot').forEach(f => f.innerHTML = foot);
+        $id('tab-ship').innerHTML = 'Відправляємо «Новою поштою» протягом ' + esc(s.ship_days || '1-2') + ' робочих днів після підтвердження оплати. Номер ТТН надсилаємо після відправлення.\n\nПодробиці: <a class="underline" href="legal.html?doc=delivery">Доставка й оплата</a>.';
+        $id('tab-ret').innerHTML = 'Протягом ' + esc(s.return_days || '14') + ' днів з моменту отримання можна повернути або обміняти товар належної якості, якщо він не використовувався й збережено ярлики.\n\nПодробиці: <a class="underline" href="legal.html?doc=returns">Повернення й обмін</a>.';
     }
 
     document.addEventListener('click', e => {
@@ -550,7 +588,7 @@
     });
 
     // ---------- ПОШУК ----------
-    const sRes = document.getElementById('search-results'), sSug = document.getElementById('search-suggest');
+    const sRes = $id('search-results'), sSug = $id('search-suggest');
     function runSearch() {
         const q = searchInput.value.trim();
         sSug.classList.toggle('hidden', !!q); sRes.classList.toggle('hidden', !q);
@@ -573,21 +611,21 @@
         const r = e.target.closest('[data-sp]');
         if (r) { searchClose.click(); openProduct(DATA.products[r.dataset.sp]); }
     });
-    document.getElementById('search-chips').addEventListener('click', e => {
+    $id('search-chips').addEventListener('click', e => {
         const c = e.target.closest('.chip');
         if (c) { searchInput.value = c.textContent; runSearch(); }
     });
 
     // ---------- СТОРІНКА ТОВАРУ ----------
     function buildRelated(cur) {
-        const box = document.getElementById('pp-related');
+        const box = $id('pp-related');
         box.innerHTML = '';
         DATA.products.filter(p => p !== cur)
             .sort((a, b) => (b.category === cur.category) - (a.category === cur.category))
             .slice(0, 12)
             .forEach(p => {
                 const item = document.createElement('div');
-                item.innerHTML = '<img src="' + esc(p.image) + '" class="w-full aspect-[4/4.8] object-cover bg-white product-img">' +
+                item.innerHTML = '<img loading="lazy" src="' + esc(p.image) + '" class="w-full aspect-[4/4.8] object-cover bg-white product-img">' +
                     '<p class="text-[13px] mt-3 leading-snug">' + esc(fullName(p)) + '</p><div class="text-[13px] mt-1 space-x-1">' + priceHtml(p) + '</div>';
                 item.addEventListener('click', () => openProduct(p, true));
                 box.appendChild(item);
@@ -598,13 +636,20 @@
     function openProduct(p, replace) {
         ppCur = p;
         const sold = isSold(p);
-        document.getElementById('pp-img').src = p.image;
-        document.getElementById('pp-title').textContent = fullName(p);
-        document.getElementById('pp-price').innerHTML = priceHtml(p);
-        document.getElementById('tab-desc').textContent = p.description || '';
+        const imgs = p.images && p.images.length ? p.images : [p.image];
+        const gal = $id('pp-gallery'), dots = $id('pp-dots');
+        gal.innerHTML = imgs.map(u => '<img src="' + esc(u) + '" class="w-full object-cover bg-white product-img" style="flex:0 0 100%;aspect-ratio:4/4.2;scroll-snap-align:start">').join('');
+        gal.scrollLeft = 0;
+        dots.innerHTML = imgs.length > 1 ? imgs.map((_, i) => '<span class="w-1.5 h-1.5 rounded-full ' + (i ? 'bg-gray-300' : 'bg-black') + '"></span>').join('') : '';
+        gal.onscroll = () => { const i = Math.round(gal.scrollLeft / gal.clientWidth); [...dots.children].forEach((d, k) => { d.className = 'w-1.5 h-1.5 rounded-full ' + (k === i ? 'bg-black' : 'bg-gray-300'); }); };
+        $id('pp-title').textContent = fullName(p);
+        $id('pp-price').innerHTML = priceHtml(p);
+        $id('tab-desc').textContent = p.description || '';
 
         ppSize = null;
-        const sizes = document.getElementById('pp-sizes');
+        const left = $id('pp-left'), sizes = $id('pp-sizes');
+        left.textContent = '';
+        const note = () => { const q = avail(p, ppSize); left.textContent = !sold && q > 0 && q <= 2 ? 'Залишилось ' + q + ' шт.' : ''; };
         sizes.innerHTML = '';
         sizes.previousElementSibling.style.display = sizes.style.display = hasSizes(p) ? '' : 'none';
         SIZES.filter(s => s in (p.sizes || {})).forEach(s => {
@@ -612,17 +657,18 @@
             b.className = 'size-btn' + (sold || !p.sizes[s] ? ' off' : '');
             b.textContent = s;
             b.addEventListener('click', () => {
-                ppSize = s;
+                ppSize = s; note();
                 sizes.querySelectorAll('.size-btn').forEach(x => x.classList.remove('active'));
                 b.classList.add('active');
             });
             sizes.appendChild(b);
         });
         sizes.style.gridTemplateColumns = 'repeat(' + Math.max(1, sizes.children.length) + ', minmax(0, 1fr))';
+        if (!hasSizes(p)) note();
 
-        const addBtn = document.getElementById('pp-add');
+        const addBtn = $id('pp-add');
         addBtn.disabled = sold; addBtn.classList.toggle('opacity-40', sold);
-        document.getElementById('pp-add-text').textContent = sold ? 'Sold out' : 'Add to cart';
+        $id('pp-add-text').textContent = sold ? 'Продано' : 'Додати в кошик';
 
         buildRelated(p);
         ppEl.scrollTop = 0;
@@ -642,17 +688,17 @@
         if (ppEl.classList.contains('open')) closeProduct(true);
         else if (filter || query) resetList();
     });
-    document.getElementById('pp-video').addEventListener('click', () => closeProduct());
-    document.getElementById('pp-menu').addEventListener('click', () => menuBtn.click());
-    document.getElementById('pp-search').addEventListener('click', () => searchBtn.click());
-    document.getElementById('pp-cart').addEventListener('click', () => cartBtn.click());
+    $id('pp-video').addEventListener('click', () => closeProduct());
+    $id('pp-menu').addEventListener('click', () => menuBtn.click());
+    $id('pp-search').addEventListener('click', () => searchBtn.click());
+    $id('pp-cart').addEventListener('click', () => cartBtn.click());
 
     document.querySelectorAll('.pp-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.pp-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             document.querySelectorAll('.pp-panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+            $id('tab-' + tab.dataset.tab).classList.remove('hidden');
         });
     });
 
@@ -661,65 +707,171 @@
     try { CART = JSON.parse(localStorage.getItem('cart') || '[]'); } catch (e) { }
     const persistCart = () => { try { localStorage.setItem('cart', JSON.stringify(CART)); } catch (e) { } };
 
-    function renderCart() {
-        if (DATA.products.length) CART = CART.filter(i => DATA.products.some(p => p.id === i.id));
-        persistCart();
-        const count = CART.reduce((n, i) => n + i.qty, 0);
-        ['cart-badge', 'pp-badge'].forEach(id => { const b = document.getElementById(id); b.textContent = count; b.style.display = count ? 'flex' : 'none'; });
-        document.getElementById('cart-title').textContent = 'YOUR BAG (' + count + ')';
-        let total = 0;
-        const html = CART.map((it, idx) => {
-            const p = DATA.products.find(x => x.id === it.id);
-            if (!p) return '';
-            total += finalPrice(p) * it.qty;
-            return '<div class="flex items-center space-x-4 border-b border-gray-100 pb-4">' +
-                '<img src="' + esc(p.image) + '" class="w-16 h-20 object-cover bg-white flex-shrink-0 product-img">' +
-                '<div class="flex-1 space-y-1 min-w-0"><h4 class="text-xs font-semibold tracking-wider uppercase">' + esc(fullName(p)) + '</h4>' +
-                (it.size ? '<p class="text-[11px] text-gray-400">Size ' + esc(it.size) + '</p>' : '') +
-                '<p class="text-xs font-semibold">' + fmt(finalPrice(p)) + '</p>' +
-                '<div class="flex items-center space-x-3 pt-1">' +
-                '<button data-c="dec" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">−</button>' +
-                '<span class="text-xs w-4 text-center">' + it.qty + '</span>' +
-                '<button data-c="inc" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">+</button>' +
-                '<button data-c="del" data-k="' + idx + '" class="text-[11px] text-gray-400 hover:text-black underline ml-2">Remove</button></div></div></div>';
-        }).join('');
-        document.getElementById('cart-items').innerHTML = html || '<p class="text-xs text-gray-400 text-center py-10">Кошик порожній</p>';
-        document.getElementById('cart-total').textContent = fmt(total);
+    function cartLines() {
+        return CART.map((it, idx) => ({ it, idx, p: DATA.products.find(x => x.id === it.id) })).filter(l => l.p);
     }
+    function renderCart() {
+        if (DATA.products.length) {
+            // залишки могли змінитись: підрізаємо кількість, прибираємо недоступне
+            CART = CART.filter(i => { const p = DATA.products.find(x => x.id === i.id); return p && !isSold(p) && avail(p, i.size) > 0; });
+            CART.forEach(i => { const p = DATA.products.find(x => x.id === i.id); i.qty = Math.min(i.qty, avail(p, i.size)); });
+        }
+        persistCart();
+        const lines = cartLines();
+        const count = lines.reduce((n, l) => n + l.it.qty, 0);
+        ['cart-badge', 'pp-badge'].forEach(id => { const b = $id(id); b.textContent = count; b.style.display = count ? 'flex' : 'none'; });
+        $id('cart-title').textContent = 'КОШИК (' + count + ')';
+        $id('cart-items').innerHTML = lines.map(({ it, idx, p }) =>
+            '<div class="flex items-center space-x-4 border-b border-gray-100 pb-4">' +
+            '<img src="' + esc(p.image) + '" class="w-16 h-20 object-cover bg-white flex-shrink-0 product-img">' +
+            '<div class="flex-1 space-y-1 min-w-0"><h4 class="text-xs font-semibold tracking-wider uppercase">' + esc(fullName(p)) + '</h4>' +
+            (it.size ? '<p class="text-[11px] text-gray-400">Розмір ' + esc(it.size) + '</p>' : '') +
+            '<p class="text-xs font-semibold">' + fmt(finalPrice(p)) + '</p>' +
+            '<div class="flex items-center space-x-3 pt-1">' +
+            '<button data-c="dec" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">−</button>' +
+            '<span class="text-xs w-4 text-center">' + it.qty + '</span>' +
+            '<button data-c="inc" data-k="' + idx + '" class="w-6 h-6 border border-gray-300 text-sm leading-none">+</button>' +
+            '<button data-c="del" data-k="' + idx + '" class="text-[11px] text-gray-400 hover:text-black underline ml-2">Видалити</button></div></div></div>'
+        ).join('') || '<p class="text-xs text-gray-400 text-center py-10">Кошик порожній</p>';
+        $id('cart-total').textContent = fmt(lines.reduce((n, l) => n + finalPrice(l.p) * l.it.qty, 0));
+        $id('cart-checkout').disabled = !lines.length;
+        $id('cart-checkout').classList.toggle('opacity-40', !lines.length);
+    }
+    const cartTotal = () => cartLines().reduce((n, l) => n + finalPrice(l.p) * l.it.qty, 0);
 
-    document.getElementById('cart-items').addEventListener('click', e => {
+    $id('cart-items').addEventListener('click', e => {
         const b = e.target.closest('[data-c]');
         if (!b) return;
         const it = CART[b.dataset.k];
         if (!it) return;
-        if (b.dataset.c === 'inc') it.qty++;
+        const p = DATA.products.find(x => x.id === it.id);
+        if (b.dataset.c === 'inc') { if (it.qty >= avail(p, it.size)) return toastMsg('Більше немає в наявності'); it.qty++; }
         if (b.dataset.c === 'dec') it.qty--;
         if (b.dataset.c === 'del' || it.qty < 1) CART.splice(b.dataset.k, 1);
         renderCart();
     });
 
-    document.getElementById('pp-add').addEventListener('click', () => {
+    $id('pp-add').addEventListener('click', () => {
         if (!ppCur || isSold(ppCur)) return;
         if (hasSizes(ppCur) && !ppSize) {
-            document.getElementById('pp-sizes').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            toastMsg('Обери розмір');
-            return;
+            $id('pp-sizes').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return toastMsg('Обери розмір');
         }
-        const ex = CART.find(i => i.id === ppCur.id && i.size === (ppSize || ''));
-        if (ex) ex.qty++; else CART.push({ id: ppCur.id, size: ppSize || '', qty: 1 });
+        const size = ppSize || '';
+        const ex = CART.find(i => i.id === ppCur.id && i.size === size);
+        if ((ex ? ex.qty : 0) + 1 > avail(ppCur, size)) return toastMsg('Більше немає в наявності');
+        if (ex) ex.qty++; else CART.push({ id: ppCur.id, size, qty: 1 });
         renderCart();
         openCart();
     });
 
     function toastMsg(t) {
-        const e = document.getElementById('pp-toast');
+        const e = $id('pp-toast');
         e.textContent = t; e.style.opacity = 1;
-        setTimeout(() => e.style.opacity = 0, 1600);
+        setTimeout(() => e.style.opacity = 0, 1800);
     }
 
+    // ---------- ОФОРМЛЕННЯ ЗАМОВЛЕННЯ ----------
+    const checkout = $id('checkout');
+    function openCheckout() {
+        const lines = cartLines();
+        if (!lines.length) return;
+        closeCart();
+        const total = cartTotal(), pre = Math.max(0, parseInt(SET.prepay_amount) || 0);
+        $id('co-summary').innerHTML = lines.map(({ it, p }) =>
+            '<div class="flex justify-between gap-3"><span>' + esc(fullName(p)) + (it.size ? ' (' + esc(it.size) + ')' : '') + ' × ' + it.qty + '</span><span class="whitespace-nowrap">' + fmt(finalPrice(p) * it.qty) + '</span></div>').join('') +
+            '<div class="flex justify-between font-semibold border-t border-gray-200 pt-2 mt-2"><span>Разом</span><span>' + fmt(total) + '</span></div>';
+        const hasPre = pre > 0 && pre < total;
+        $id('co-pay').innerHTML =
+            (hasPre ? '<label class="flex gap-3 items-start border border-gray-200 p-3 mb-2 cursor-pointer"><input type="radio" name="co-pay" value="prepay" checked class="mt-1"><span class="text-xs">Передоплата <b>' + fmt(pre) + '</b> зараз<br><span class="text-gray-500">решта ' + fmt(total - pre) + ' — при отриманні на «Новій пошті»</span></span></label>' : '') +
+            '<label class="flex gap-3 items-start border border-gray-200 p-3 cursor-pointer"><input type="radio" name="co-pay" value="full" ' + (hasPre ? '' : 'checked') + ' class="mt-1"><span class="text-xs">Повна оплата <b>' + fmt(total) + '</b></span></label>';
+        $id('co-err').classList.add('hidden');
+        $id('co-form').classList.remove('hidden'); $id('co-done').classList.add('hidden');
+        checkout.style.display = 'block'; checkout.scrollTop = 0;
+        document.body.style.overflow = 'hidden';
+    }
+    function closeCheckout() {
+        checkout.style.display = 'none';
+        document.body.style.overflow = ppEl.classList.contains('open') ? 'hidden' : '';
+    }
+    $id('cart-checkout').addEventListener('click', openCheckout);
+    $id('co-close').addEventListener('click', closeCheckout);
+    $id('co-back').addEventListener('click', closeCheckout);
+
+    $id('co-submit').addEventListener('click', async () => {
+        const err = m => { const e = $id('co-err'); e.textContent = m; e.classList.remove('hidden'); };
+        const name = $id('co-name').value.trim(), phone = $id('co-phone').value.trim(), city = $id('co-city').value.trim(), branch = $id('co-branch').value.trim();
+        if (name.length < 2) return err('Вкажіть ім\'я');
+        if (phone.replace(/\D/g, '').length < 10) return err('Вкажіть коректний номер телефону');
+        if (!city || !branch) return err('Вкажіть місто та відділення «Нової пошти»');
+        const pay = (document.querySelector('input[name="co-pay"]:checked') || {}).value || 'full';
+        const btn = $id('co-submit'); btn.disabled = true; btn.textContent = 'Оформлюємо…';
+        try {
+            const r = await fetch(API + 'rpc/create_order', {
+                method: 'POST', headers: { ...HDR, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ p_name: name, p_phone: phone, p_city: city, p_branch: branch, p_comment: $id('co-comment').value.trim(), p_pay: pay, p_items: CART.map(i => ({ id: i.id, size: i.size, qty: i.qty })) })
+            });
+            const j = await r.json();
+            if (!r.ok) {
+                const m = j.message || '';
+                if (m.startsWith('unavailable') || m.includes('product_gone')) {
+                    await loadData();
+                    err('На жаль, частини товарів уже немає в потрібній кількості. Ми оновили кошик — перевірте його й спробуйте ще раз.');
+                } else err('Не вдалося оформити замовлення. Спробуйте ще раз або напишіть нам.');
+                return;
+            }
+            CART = []; renderCart(); loadData();
+            const toPay = j.prepay;
+            $id('co-done-text').innerHTML = '<p class="text-lg">Дякуємо! Замовлення №' + j.id + '</p>' +
+                '<p class="text-xs text-gray-600">Ми зарезервували ваші товари. Сума до оплати зараз: <b>' + fmt(toPay) + '</b>' + (toPay < j.total ? ' (решта ' + fmt(j.total - toPay) + ' — при отриманні)' : '') + '.</p>' +
+                (SET.payment_details ? '<div class="text-xs text-left border border-gray-200 p-4 whitespace-pre-line">' + esc(SET.payment_details) + '\n\nВ призначенні платежу вкажіть: замовлення №' + j.id + '</div>' : '<p class="text-xs text-gray-600">Ми зв\'яжемось з вами найближчим часом для підтвердження й оплати.</p>');
+            $id('co-form').classList.add('hidden'); $id('co-done').classList.remove('hidden'); checkout.scrollTop = 0;
+        } catch (e) { err('Помилка мережі. Перевірте інтернет і спробуйте ще раз.'); }
+        finally { btn.disabled = false; btn.textContent = 'Підтвердити замовлення'; }
+    });
+    $id('co-finish').addEventListener('click', () => { closeCheckout(); closeProduct(true); });
+
+    // ---------- ЗАВАНТАЖЕННЯ ДАНИХ ----------
+    async function loadData() {
+        const [prods, sd, st] = await Promise.all([get('products?select=*&order=created_at.desc'), get('store_data?id=eq.1&select=data'), get('settings?select=*')]);
+        DATA = { categories: sd[0].data.categories || [], brands: sd[0].data.brands || [], products: prods.map(normalize) };
+        SET = Object.fromEntries(st.map(r => [r.key, r.value]));
+        buildMenus(); applySettings(); renderGrid(); renderCart();
+    }
     renderCart();
-    fetch(new URL(SUPABASE_URL.trim()).origin + '/rest/v1/store_data?id=eq.1&select=data', { headers: { apikey: SUPABASE_ANON_KEY.trim() }, cache: 'no-store' }).then(r => r.json()).then(rows => { DATA = rows[0].data; buildMenus(); renderGrid(); renderCart(); })
-        .catch(() => { document.getElementById('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити товари</p>'; });
+    loadData().catch(() => { $id('products-grid').innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-10">Не вдалося завантажити товари. Оновіть сторінку.</p>'; });
+
+    // ---------- СВАЙП, щоб закрити меню (вліво) і кошик (вправо) ----------
+    function swipeClose(panel, backdrop, dir, close) {
+        let x0 = 0, y0 = 0, dx = 0, drag = false, locked = false;
+        panel.style.touchAction = 'pan-y';
+        panel.addEventListener('touchstart', e => {
+            const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; dx = 0; drag = false; locked = false;
+        }, { passive: true });
+        panel.addEventListener('touchmove', e => {
+            const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
+            if (!locked) {
+                if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+                locked = true;
+                drag = Math.abs(mx) > Math.abs(my) && mx * dir > 0;   // лише горизонтальний рух у бік закриття
+                if (drag) { panel.style.transition = 'none'; backdrop.style.transition = 'none'; }
+            }
+            if (!drag) return;
+            dx = Math.max(0, mx * dir);
+            panel.style.transform = 'translateX(' + (dx * dir) + 'px)';
+            backdrop.style.opacity = String(Math.max(0, 1 - dx / panel.offsetWidth));
+        }, { passive: true });
+        const end = () => {
+            if (!drag) return;
+            drag = false; panel.style.transition = ''; backdrop.style.transition = '';
+            if (dx > 80 || dx > panel.offsetWidth * 0.25) close();
+            else { panel.style.transform = 'translateX(0)'; backdrop.style.opacity = '1'; }
+        };
+        panel.addEventListener('touchend', end);
+        panel.addEventListener('touchcancel', end);
+    }
+    swipeClose(menuPanel, menuBackdrop, -1, closeMenu);
+    swipeClose(cartPanel, cartBackdrop, 1, closeCart);
     </script>
 </body>
 </html>
